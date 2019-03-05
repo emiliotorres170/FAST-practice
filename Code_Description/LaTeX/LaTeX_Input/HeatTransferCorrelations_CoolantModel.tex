@@ -1,0 +1,29 @@
+\chapter{Coolant Model and Heat Transfer Correlations} \label{chapter:HTC_and_models}
+The coolant enthalpy rise model and clad-to-coolant heat transfer correlations are described in this
+chapter. The heat transfer correlations supply one of the equations required for calculation of the
+fuel rod surface temperature, as discussed in Section~\ref{section:coolant-conditions}. Also
+described is the calculation of the coolant void fraction for water. The available coolants are:
+
+\begin{itemize}
+  \item Water (default)
+  \item Sodium
+  \item Helium
+\end{itemize}
+
+The following inputs are used to calculate the coolant temperature, pressure and heat transfer
+coefficient as a function of time and location:
+
+\begin{itemize}
+  \item Inlet temperature
+  \item Inlet mass flux
+  \item Inlet pressure
+\end{itemize}
+
+It is allowed to bypass the coolant model entirely but still use the built-in clad-to-coolant heat
+transfer coefficients based on the coolant type. Instructions on how to use this option are provided
+in Section~\ref{section:boundary_block}.
+
+\input{LaTeX_Input/HeatTransferCorrelations_CoolantModel/coolant_enthalpy_model.tex}
+\input{LaTeX_Input/HeatTransferCorrelations_CoolantModel/water.tex}
+\input{LaTeX_Input/HeatTransferCorrelations_CoolantModel/sodium.tex}
+\input{LaTeX_Input/HeatTransferCorrelations_CoolantModel/helium.tex}

@@ -1,0 +1,84 @@
+\section{Coolant Conditions}\label{section:coolant-conditions}
+
+If the user chooses to model the coolant as water, the fuel rod cooling model calculates the amount
+of heat transfer from the fuel rod to the surrounding coolant. The model calculates the heat
+transfer coefficient, surface heat flux, and temperature at the cladding surface. These variables
+are determined by the simultaneous solution of two independent equations for cladding surface heat
+flux and surface temperature.
+\\
+\\
+One of the equations is the appropriate correlation for convective heat transfer from the fuel rod
+surface. This correlation relates surface heat flux to surface temperature and coolant conditions.
+Different correlations are required for different heat transfer modes, such as nucleate or film
+boiling. The relation of the surface heat flux to the surface temperature for the various heat
+transfer modes is shown in Figure~\ref{fig:water_SHF_temp}. Logic for selecting the appropriate mode
+and the correlations available for each mode are shown in Table~\ref{tab:Water_HTMode_Selection}.
+The correlations are described in Section~\ref{chapter:HTC_and_models}.
+\\
+\\
+The second independent equation containing surface temperature and surface heat flux as the only
+unknown variables is derived from the finite difference equation for heat conduction at the mesh
+bordering the fuel rod surface. A typical plot of this equation during the nucleate boiling mode of
+heat transfer is also shown in Figure~\ref{fig:water_SHF_temp}. The intersection of the plot of this
+equation and that of the heat transfer correlations determines the surface heat flux and
+temperature. The derivation of this equation and the simultaneous solution for surface temperature
+and surface heat flux are described in Appendix C. Neither of the two equations solved
+simultaneously contains past iteration values so that numerical instabilities at the onset of
+nucleate boiling are avoided. A separate set of heat transfer correlations is used to calculate fuel
+rod cooling during the reflooding portion of a LOCA.  During this period, liquid cooling water is
+injected into the lower plenum and the liquid level gradually rises over time to cover the fuel
+rods. This complex heat transfer process is modeled by a set of empirical relations derived from
+experiments performed in the FLECHT facility (\cite{ref:Cadek1972}). A description
+of these models is presented in \colorbox{yellow}{Appendix D}.
+\\
+\\
+The user specifies the inlet condition at the bottom of the fuel rod.  The enthalpy rise across the
+height of the coolant channel is initially calculated based on the known surface heat flux from the
+previous timestep. The values obtained from the bottom and top of the coolant channel (Axial nodes
+$j-1$ and $j$) are averaged together to obtain a ``cell-centered'' average coolant condition used as
+the boundary condition in the conduction solution.
+
+\begin{figure}
+    \includegraphics[height=\figheight\textheight]{../media/image152}
+    \caption{Relation of Surface Heat Flux to Surface Temperature}
+    \label{fig:water_SHF_temp}
+\end{figure}
+
+\begin{ThreePartTable}
+    \begin{TableNotes}
+        \footnotesize
+        \item[a] 
+		    The symbols used are                                              \\ 
+            $   Q_i      $  =   Surface flux in the $i-th$ heat transfer mode \\
+            $   X        $  =   Coolant Quality                               \\
+            $   Q_{crit} $  =   Critical heat flux                            \\
+            $   G        $  =   Mass flux \sinum{lbm/hr-ft^{2}})              \\
+            $   T_{w}    $  =   Cladding surface temperature                  \\
+            $   P        $  =   Coolant Pressure \sinum{psia}                 \\
+            $   T_{sat}  $  =   Saturation temperature of coolant             \\
+            $   T_{bulk} $  =   Local bulk temperature of coolant             \\
+        \item[b] 
+            Parameters limits describing the range of the heat transfer apply
+            to the default correlation for each mode. The correlation to be used
+            is specified in the input.
+    \end{TableNotes}
+
+    \begin{longtable}[c]{L K J J}
+        \caption{Water Heat Transfer Mode Selection and Correlation}   \\
+        \label{tab:Water_HTMode_Selection}                             \\ \hline
+        Heat Transfer Mode                                &     Range \tnote{a}                                                                         &   Default Correlation \tnote{b}                                                                                          &   Optional Heat Transfer Correlation(s)                                              \\   \hline
+        \endfirsthead
+        \caption[]{Water Heat Transfer Mode Selection and Correlation} \\ \hline
+        Heat Transfer Mode                                &     Range \tnote{a}                                                                         &   Default Correlation \tnote{b}                                                                                          &   Optional Heat Transfer Correlation(s)                                              \\   \hline
+        \endhead
+        \insertTableNotes
+        \endlastfoot
+        Forced convection to subcooled liquid (Mode 1)    &  \(T_{w} < T_{sat}\)  \(Q_{2} < Q_{1} < Q_{crit})\)                                         & Dittus-Boelter (\cite{ref:Dittus1930a}) for turbulent flow; constant $Nu = 7.86$ for laminar flow (\cite{ref:Sparrow1961}) &  -                                                                                     \\   \hline
+        Subcooled nucleate boiling (Mode 2)               &  \(Q_{1} < Q_{2} < Q_{crit}\) \(T_{b} > T_{sat}\) \(T_{w} > T_{sat}\)  & Jens-Lottes                                                                                                                      &  Chen (\cite{ref:Chen1963}) Thom (\cite{ref:Thom1965})                                                \\   \hline
+        Saturated nucleate boiling (Mode 3)               &  \(Q_{1} < Q_{2} < Q_{crit}\) \(T_{b} = T_{sat}\) \(T_{w} > T_{sat}\)  & Jens-Lottes                                                                                                                      &  Chen (\cite{ref:Chen1963}) Thom (\cite{ref:Thom1965})                                                \\   \hline
+        Post-CHF transition boiling (Mode 4)              &  \(Q_{2} > Q_{crit}\) \(Q_{4} > Q_{5}\) \(G > 200,000\)                              & Modified Tong-Young (Tong and Young 1974)                                                                          &  Bjornard-Griffith (\cite{ref:Bjornard1977}) Modified Condie-Bengston (\cite{ref:INL1978})            \\   \hline
+        Post-CHF film boiling (Mode 5)                    &  \(Q_{2} > Q_{crit}\) \(Q_{5} > Q_{4}\) \(Q_{5} > Q_{6}\) \(G > 200,000\)            & Groeneveld 5.9 (\cite{ref:Groeneveld1973}, \cite{ref:Groeneveld1978}; \cite{ref:Groeneveld1976})                   &  Bishop-Sandberg-Tong (\cite{ref:Bishop1965}) Groeneveld-Delorme (\cite{ref:Groeneveld1976})          \\   \hline
+        Post-CHF boiling for low flow conditions (Mode 7) &  \(Q_{2} > Q_{crit}\) \(Q_{6} > Q_{5}\) \(G < 200,000\)                              & Bromley (\cite{ref:Bromley1950})                                                                                   &  -                                                                                                    \\   \hline
+        Forced convection to superheated steam (Mode 8)   &  \(X > 1\)                                                                           & Dittus-Boelter (\cite{ref:Dittus1930a})                                                                            &  -                                                                                                    \\   \hline
+    \end{longtable}
+\end{ThreePartTable}

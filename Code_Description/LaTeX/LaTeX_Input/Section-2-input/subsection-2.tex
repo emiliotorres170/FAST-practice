@@ -1,0 +1,106 @@
+\section{Coupling of Thermal and Mechanical Models}\label{section:coupling-of-thermal-mechanical-models}
+%-------------------------------------------------------------------------%
+% Steady State 
+%-------------------------------------------------------------------------%
+\subsection{Steady-State}\label{steady-state-1}
+The close coupling of the thermal modeling and mechanical modeling is the result of the existence of
+the fuel-cladding gap. As the fuel temperature increases, the extreme stresses resulting from the
+large temperature gradients in the fuel cause the fuel to crack and relocate. Cracks can be
+circumferential or radial, but are predominantly radial. Void space, which is originally in the
+fuel-cladding gap, is relocated into the fuel as fragments of fuel move outwardly into the
+fuel-cladding gap.
+\\
+\\
+As the fuel becomes hotter, the fuel expands, filling some of the voids within the fuel. However,
+asperities do not align exactly, thereby causing the fuel diameter to appear larger and the fuel to
+interact with the cladding at a lower power than that expected due to normal expansion (or
+contraction) mechanisms, including thermal expansion, swelling, and densification. FRACAS-I has been
+modified to allow 50\percent of the original fuel surface relocation to be recovered due to fuel
+swelling before hard contact is established between the fuel and the cladding.
+\\
+\\
+The modeling of the cracked and relocated fuel, both thermally and mechanically, requires accounting
+for changed fuel-cladding gap size (and hence gap conductance) and the changed fuel pellet diameter
+as the fuel interacts with the cladding. The fuel surface relocation provides a new fuel-cladding
+gap size for calculating gap conductance and mechanical interactions. Also considered is the shift
+of voids from the fuel-cladding gap into cracks in the fuel pellet (and the resultant pressure
+change due to higher temperature in the cracks) and the feedback into the mechanics and thermal
+calculations.
+\\
+\\
+FRACAS-I uses the relocated fuel-cladding gap size for the thermal calculations and makes partial
+use of the fuel surface relocation in the mechanics calculation (i.e., when 50\percent of the
+relocation is recovered, the code assumes the pellet to be a rigid structure, and, therefore, hard
+contact is assumed between the fuel and cladding).
+%-------------------------------------------------------------------------%
+% Transient 
+%-------------------------------------------------------------------------%
+\subsection{Transient}\label{transient-1}
+The order of the general models in FRAPTRAN is shown in Figure~\ref{fig:FAST-soln-scheme}.  The
+solution for the fuel rod variables begins with the calculation of the temperatures of the fuel and
+cladding. The temperature of the gases in the fuel rod is then calculated. Next, the stresses and
+strains in the fuel and cladding are calculated. The pressure of the gas inside the fuel rod is then
+calculated, including the fission gas release predicted. This sequence of calculations is cycled
+until essentially the same temperature distribution (i.e., within specified convergence criteria) is
+calculated for two successive cycles. Finally, the cladding oxidation and clad ballooning are
+calculated. Time is then incrementally advanced, and the complete sequence of calculations is then
+repeated to obtain the values of the fuel rod variables at the advanced time.
+\\
+\\
+The models interact in several ways. The temperature of the fuel, which is calculated by the thermal
+model, is dependent on the width of the fuel-cladding gap and fuel-cladding interfacial pressure,
+which is calculated by the deformation model. The diameter of the fuel pellet is dependent on the
+temperature distribution in the fuel pellet. The mechanical properties of the cladding vary
+significantly with temperature. The internal gas pressure varies with the temperature of the fuel
+rod gases, the strains of the fuel and cladding, and any fission gas release predicted. The stresses
+and strains in the cladding are dependent on the internal gas pressure. In addition, there is a
+burnup dependence to the initial value of numerous variables necessary for calculating the transient
+response of a fuel rod.
+\\
+\\
+The model interactions are taken into account by iterative calculations.  The variables calculated
+in one model are treated as independent variables by the other models. For example, the
+fuel-cladding gap size, which is calculated by the deformation model, is treated as an independent
+variable by the thermal model. On the first iteration of a new time step, the thermal model assumes
+the fuel-cladding gap size is equal to the value calculated by the deformation model on the last
+iteration of the previous time step. On the \(\iteration{i}\) iteration, the thermal model assumes
+the fuel-cladding gap size is equal to the value calculated by the deformation model in the
+\(\iteration{(i-1)}\) iteration.
+\\
+\\
+The sequence of the iterative computations is shown in Figure~\ref{fig:FAST-soln-scheme}. Two nested
+loops of calculations are repeatedly cycled until convergence occurs. In the inside loop, the
+deformation and gas pressure models are repeatedly cycled until two successive cycles calculate gas
+pressure within the convergence criteria. Convergence usually occurs within two cycles. In the
+outside loop, the fuel and cladding thermal model, plenum gas thermal model, and the inner loop are
+repeatedly cycled until the fuel rod temperature distribution is calculated within the convergence
+criteria. Convergence usually occurs within two or three cycles. After the computations of the outer
+loop have converged, the cladding oxidation and ballooning are calculated, and a new time step is
+taken.
+\\
+\\
+The convergences of both the inner and the outer calculational loops are accelerated by use of the
+method of Newton. In the inner loop, the deformation model for the $\iteration{(i+1)}$ iteration is
+given the predicted gas pressure for the $\iteration{(i+1)}$ iteration. The gas pressure is
+predicted by the method of Newton and is based on the gas pressures calculated in the
+$\iteration{(i-1)}$ and $\iteration{i}$ iterations. The gas pressure is predicted by
+
+\begin{equation}
+    \label{eq:gas_pressure_iteration_scheme}
+    P_{p}^{i + 1} = \frac{\left( P_{c}^{i - 1} - \frac{P_{c}^{i} - P_{c}^{i - 1}}{P_{p}^{i} - P_{p}^{i - 1}}P_{p}^{i - 1} \right)}{\left( 1 - \frac{P_{c}^{i} - P_{c}^{i - 1}}{P_{p}^{i} - P_{p}^{i - 1}} \right)}
+\end{equation}
+
+Where,
+    \ind{   $\left(P_{p}^{i + 1}\right)   =   \text{Gas pressure predicted for the $\iteration{\left(i + 1\right)}$ iteration}$ }
+    \ind{   $\left(P_{p}^{i}\right)       =   \text{Gas pressure predicted for the $\iteration{\left(i\right)}$ iteration} $    }
+    \ind{   $\left(P_{c}^{i}\right)       =   \text{Gas pressure calculated by the $\iteration{\left(i\right)}$ iteration} $    }
+
+The convergence of the outer loop is accelerated in a manner similar to that of the inner loop, but
+with the fuel-cladding gap conductance as the predicted variable instead of the gas pressure.
+
+\begin{figure}
+    \centering
+    \includegraphics[height=\figheight\textheight]{../media/image5}
+    \caption{Order of FAST Solution Schemes}
+    \label{fig:FAST-soln-scheme}
+\end{figure}

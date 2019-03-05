@@ -1,0 +1,406 @@
+%-------------------------------------------------------------------------%
+% 2.4 Plenum Thermal Response                                             %
+%-------------------------------------------------------------------------%
+\section{Plenum Thermal Response}\label{section:fuel-rod-thermal-response}
+
+\subsection{Plenum Temperature Equations}\label{section:plenum-temperature-equations}
+
+The plenum thermal model calculates the energy exchange between the plenum gas and structural
+components, which consists of the hold-down spring, end fuel pellet, and cladding. Energy exchange
+between the gas and structural components occurs by natural convection, conduction, and radiation. A
+schematic of these energy exchange mechanisms is shown in
+Figure~\ref{fig:energy_flow_plenum_model_energy_exchange}. The spring is modeled by two nodes of
+equal mass (a center node and a surface node) as shown in
+Figure~\ref{fig:energy_flow_plenum_model_spring_2_nodes}. The cladding is modeled by three nodes
+(two surface nodes and one center node) as shown in Figure~\ref{fig:cladding_nodalization}. The
+center node has twice the mass of the surface nodes. This nodalization scheme results in a set of
+six energy equations from which the plenum thermal response can be calculated. The transient energy
+equations for the gas, spring, and cladding are as follows (the nomenclature used in the equations
+is defined in Table~\ref{tab:nomenclature_plenum_model}):
+
+\begin{figure}
+    \includegraphics[height=\figheighttwo{0.2}\textheight]{../media/image10}
+    \caption{Energy Flow in Plenum Model-Spring Model with Two Nodes \colorbox{yellow}{We should consider re-making}}
+    \label{fig:energy_flow_plenum_model_spring_2_nodes}
+\end{figure}
+
+\begin{figure}
+    \includegraphics[height=\figheight\textheight]{../media/image11}
+    \caption{Energy Flow in Plenum Model -- Energy Exchange Mechanisms \colorbox{yellow}{We should consider re-making}}
+    \label{fig:energy_flow_plenum_model_energy_exchange}
+\end{figure}
+
+\begin{figure}
+    \includegraphics[height=\figheight\textheight]{../media/image12}
+    \caption{Cladding Nodalization \colorbox{yellow}{We should consider re-making}}
+    \label{fig:cladding_nodalization}
+\end{figure}
+
+\begin{figure}
+    \includegraphics[height=\figheight\textheight]{../media/image13}
+    \caption{Geometrical Relationship Between the Cladding and Spring \colorbox{yellow}{We should consider re-making}}
+    \label{fig:plenum_temp_geometry_clad_spring}
+\end{figure}
+
+\begin{figure}
+    \includegraphics[height=\figheight\textheight]{../media/image14}
+    \caption{Flowchart of Plenum Temperature Calculation \colorbox{yellow}{We should consider re-making}}
+    \label{fig:plenum_temp_flowchart}
+\end{figure}
+
+\begin{enumerate}
+  \item Plenum gas
+    \begin{equation}
+        \label{eq:plenum_temp_calc_plenum_gas}
+        V_{g}\rho_{g}C_{g}\frac{\partial T_{g}}{\partial t} = A_{ep}h_{ep}\left( T_{ep} - T_{g} \right) + A_{cl}h_{cl}\left( T_{cli} - T_{g} \right) + A_{SS}h_{S}\left( T_{SS} - T_{g} \right)
+    \end{equation}
+
+  \item Spring center node
+    \begin{equation}
+        \label{eq:plenum_temp_calc_spring_center_node}
+        V_{sc}\rho_{s}C_{s}\frac{\partial T_{SS}}{\partial t} = \overline{q}V_{sc} + \frac{A_{SC}k_{S}\left( T_{SS} - T_{SC} \right)}{R_{SS}}
+    \end{equation}
+
+  \item Spring surface node
+    \begin{equation}
+        \label{eq:plenum_temp_calc_spring_surface_node}
+        \begin{aligned}
+            V_{ss}C_{s}\rho_{s}\frac{\partial T_{SS}}{\partial t} = \overline{q}V_{ss} + A_{SC}k_{S}\left( T_{SC} - T_{SS} \right) + A_{SS}h_{rads}\left( T_{cli} - T_{SS} \right) \\
+            + A_{SS}h_{S}\left( T_{g} - T_{SS} \right) + A_{SS}h_{cons}\left( T_{cli} - T_{SS} \right)
+        \end{aligned}
+    \end{equation}
+
+where \(h_{cons}\) is the conductance between the spring and cladding. The
+conductance is used only when a stagnant gas condition exists, that
+is, when the natural convection heat transfer coefficient for the
+spring (\(h_{s}\)) is zero.
+
+  \item Cladding interior node
+    \begin{equation}
+        \label{eq:plenum_temp_calc_clad_interior_node}
+        \begin{aligned}
+             V_{cli}\rho_{cl}C_{cl}\frac{\partial T_{cli}}{\partial t} = & \overline{q}V_{cli} + A_{cl}h_{radc}\left( T_{SS} - T_{cli} \right) +  A_{cl}h_{cl}\left( T_{g} - T_{cli} \right) \\
+             & + A_{cl}h_{conc}\left( T_{SS} - T_{cli} \right) + \frac{A_{cl}k_{cl}}{\frac{\mathrm{\Delta}r}{2}}\left( T_{clc} - T_{cli} \right)
+        \end{aligned}
+    \end{equation}
+
+  \item Cladding central node
+    \begin{equation}
+        \label{eq:plenum_temp_calc_clad_central_node}
+        V_{\text{clc}}\rho_{\text{cl}}C_{\text{cl}}\frac{\partial T_{\text{clc}}}{\partial t} = \overline{q}V_{\text{clc}} + \frac{A_{\text{cl}}k_{\text{cl}}}{\frac{\mathrm{\Delta}r}{2}}\left( T_{\text{cli}} - T_{\text{clc}} \right) + \frac{A_{\text{cl}}k_{\text{cl}}}{\frac{\mathrm{\Delta}r}{2}}\left( T_{\text{clo}} - T_{\text{clc}} \right)
+    \end{equation}
+
+  \item Cladding exterior node
+    \begin{equation}
+        \label{eq:plenum_temp_calc_clad_exterior_node}
+        T_{\text{clo}} = T_{\text{cool}}
+    \end{equation}
+
+\end{enumerate}
+%-------------------------------------------------------------------------%
+% Long table
+%-------------------------------------------------------------------------%
+\input{LaTeX_Input/Section-2-input/table/nomenclature_plenum_thermal_model}
+For steady-state analysis, the time derivatives of temperature on the left side of
+Equations~\ref{eq:plenum_temp_calc_plenum_gas} through~\ref{eq:plenum_temp_calc_clad_central_node}
+are set equal to zero and the temperature distribution in the spring and cladding is assumed to be
+uniform.
+\\
+\\
+To obtain a set of algebraic equations, Equations~\ref{eq:plenum_temp_calc_plenum_gas}
+through~\ref{eq:plenum_temp_calc_clad_exterior_node} are written in the Crank-Nicolson
+(\cite{ref:Crank1974}) implicit finite difference form. This formulation results in a set of six
+equations and six unknowns. The details of the finite difference formulation of
+Equations~\ref{eq:plenum_temp_calc_plenum_gas} through~\ref{eq:plenum_temp_calc_clad_exterior_node}
+and the logic of the plenum temperature model are given in \colorbox{yellow}{Appendix E.}
+%-------------------------------------------------------------------------%
+% Heat Conduction Coefficients
+%-------------------------------------------------------------------------%
+\subsection{Heat Conduction Coefficients}\label{section:heat-conduction-coefficients}
+Heat transfer between the plenum gas and the structural components occurs by natural convection,
+conduction, and radiation. The required heat transfer coefficients for these three modes are
+described in the following section.
+
+\subsubsection{Natural Convection Heat Transfer Coefficients}\label{section:natural-convection-heat-transfer-coefficients}
+Energy exchange by natural convection occurs between the plenum gas and the top of the fuel pellet
+stack, the spring, and the cladding. Heat transfer coefficients \(h_{ep}\), \(h_{s}\), and
+\(h_{cl}\), in the equations above, model this energy exchange.  To calculate these heat transfer
+coefficients, the top of the fuel stack is assumed to be a flat plate, the spring is assumed to be a
+horizontal cylinder, and the cladding is assumed to be a vertical surface. Both laminar and
+turbulent natural convection are assumed to occur.  Correlations for the heat transfer coefficients
+for these types of heat transfer are obtained from \cite{ref:Kreith1964a} and
+\cite{ref:McAdams1954b}.
+\\
+\\
+The flat plate natural convection coefficients used for the end pellet surface heat transfer are
+given below.
+\begin{enumerate}
+    \item
+      For laminar conditions on a heated surface:
+        \begin{equation}
+            \label{eq:plate_natural_convection_laminar_heated_surface}
+            h_{ep} = 0.54k_{g}\frac{\left( GrPr \right)^{0.25}}{ID}
+        \end{equation}
+    \item
+        For turbulent conditions (Grashof Number, \(Gr>\num{2.0E7}\)), on a heated surface:
+        \begin{equation}
+            \label{eq:plate_natural_convection_turbulent_heated_surface}
+            h_{ep} = 0.14k_{g}\frac{\left( GrPr \right)^{0.33}}{ID}
+        \end{equation}
+    \item
+      For laminar conditions on a cooled surface:
+        \begin{equation}
+            \label{eq:plate_natural_convection_laminar_cooled_surface}
+            h_{ep} = 0.27k_{g}\frac{\left( GrPr \right)^{0.25}}{ID}
+        \end{equation}
+\end{enumerate}
+
+The following natural convection coefficients for horizontal cylinders are used for the film
+coefficient for the spring.
+\begin{enumerate}
+    \item
+      For laminar conditions:
+        \begin{equation}
+            \label{eq:cylinder_natural_convection_laminar}
+            h_{s} = 0.53k_{g}\frac{\left( GrPr \right)^{0.25}}{DIAS}
+        \end{equation}
+    \item
+        For turbulent conditions ($\num{1.0E9} \leq Gr \leq \num{1.0E12}$):
+        \begin{equation}
+            \label{eq:cylinder_natural_convection_tubulent}
+            h_{s} = 0.18\left( T_{g} - T_{SS} \right)^{0.33}
+        \end{equation}
+\end{enumerate}
+
+The vertical surface natural convection coefficients used for the
+cladding interior surface are given below.
+\begin{enumerate}
+    \item
+      For laminar conditions:
+        \begin{equation}
+            \label{eq:vertical_natural_convection_laminar}
+            h_{cl} = 0.55k_{g}\frac{\left( GrPr \right)^{0.25}}{L_{p}}
+        \end{equation}
+    
+    \item
+        For turbulent conditions ($Gr > \num{1E9}$):
+        \begin{equation}
+            \label{eq:vertical_natural_convection_turbulent}
+            h_{cl} = 0.021k_{g}\frac{\left( GrPr \right)^{0.4}}{L_{p}}
+        \end{equation}
+\end{enumerate}
+
+These natural convection correlations were derived for flat plates, horizontal cylinders, and
+vertical surfaces in an infinite gas volume.  Heat transfer coefficients calculated using these
+correlations are expected to be higher than those actually existing within the confined space of the
+plenum. Until additional plenum temperature experimental data are available, these coefficients are
+believed to provide an acceptable estimate of the true value.
+%-------------------------------------------------------------------------%
+% Conduction Heat Transfer Coefficients
+%-------------------------------------------------------------------------%
+\subsubsection{Conduction Heat Transfer Coefficients}\label{conduction-heat-transfer-coefficients}
+
+Conduction of energy between the spring and cladding is represented by the heat transfer
+coefficients \(h_{cons}\) and \(h_{conc}\) in
+Equations~\ref{eq:plenum_temp_calc_spring_surface_node}
+and~\ref{eq:plenum_temp_calc_clad_interior_node}. These coefficients are both calculated when
+stagnant gas conditions exist. The conduction coefficients are calculated based on the spring and
+cladding geometries shown in Figure~\ref{fig:plenum_temp_geometry_clad_spring} and the following
+assumptions:
+\begin{itemize}
+
+    \item The cladding and spring surface temperatures are uniform.
+
+    \item The cladding and spring surface temperatures are uniform.
+    
+    \item Energy is conducted only in the direction perpendicular to the cladding wall (heat flow is
+        one-dimensional).
+        
+\end{itemize}
+
+Based on these assumptions, and the geometry given in
+Figure~\ref{fig:plenum_temp_geometry_clad_spring}, the energy (\(q\)) conducted from an elemental
+surface area of the spring (\(L_{S}R_{S}d \theta\)) to the cladding is
+
+\begin{equation}
+    \label{eq:cladding_energy_surface_spring}
+    dq = \frac{k_{g}\left( T_{SS} - T_{cli} \right)\left( L_{S}R_{S}\sin \theta d\theta \right)}{d + R_{S} - R_{S}\sin \theta }
+\end{equation}
+
+Where,
+    \ind{   $\theta$ is the azimuthal coordinate.}
+
+By integration of Equation~\ref{eq:cladding_energy_surface_spring} over the surface area of the
+spring facing the cladding, the total flow of energy is given by
+
+\begin{equation}
+    \label{eq:plenum_total_energy_flow}
+    q = \frac{k_{g}A_{SS}}{\pi}\left( T_{SS} - T_{cli} \right)
+        \left\{ - \frac{\pi}{2R_{S}} + \frac{2}{R_{S}}\left[\frac{\frac{1}{1 - {R_{S}}^{2}}}{\left( \delta + 2R_{S} \right)^{2}} + \operatorname{}\left( \frac{\tan\frac{\theta}{2} - \frac{R_{S}}{\delta + 2R_{S}}}{1 - \frac{{R_{S}}^{2}}{\left( \delta + 2R_{S} \right)^{2}}} \right) \right] \right\} \Bigg \vert_{\theta = 0}^{\theta = \frac{\pi}{2}}
+\end{equation}
+
+The two conduction heat transfer coefficients, $h_{cons}$ and $h_{conc}$, are calculated by
+Equations~\ref{eq:plenum_hcons} and ~\ref{eq:plenum_hconc}.
+\begin{equation}
+    \label{eq:plenum_hcons}
+    h_{cons} = \frac{q\left( T_{SS} - T_{cli} \right)}{A_{SS}}
+\end{equation}
+
+\begin{equation}
+    \label{eq:plenum_hconc}
+    h_{conc} = h_{cons}\frac{A_{SS}}{A_{cl}}
+\end{equation}
+
+When natural convection heat transfer exists (\(h_{cl}\) or \(h_{s}\) greater than 0.0), energy is
+assumed to flow to the gas from the spring and then from the gas to the cladding wall, or vice
+versa.  Under these conditions, \(h_{cons}\) and \(h_{conc}\) are set equal to zero. Therefore,
+\(h_{cons}\) and \(h_{conc}\) are used only when the temperature is uniform throughout the plenum.
+Future plenum data or analytical analysis may indicate that natural convection flow between the
+spring and cladding does not exist, in which case non-zero conduction coefficients should be used at
+all times.
+%-------------------------------------------------------------------------%
+% Conduction Heat Transfer Coefficients
+%-------------------------------------------------------------------------%
+\subsubsection{Radiation Heat Transfer Coefficients}\label{radiation-heat-transfer-coefficients}
+
+Transport of energy by radiation between the spring and cladding is included in the plenum model by
+use of the heat transfer coefficients \(h_{rads}\) and \(h_{radc}\) in
+Equations~\ref{eq:plenum_temp_calc_spring_surface_node}
+and~\ref{eq:plenum_temp_calc_clad_interior_node}.  These coefficients are derived from the radiant
+energy exchange equation for two gray bodies in thermal equilibrium (\cite{ref:Kreith1964a})
+as follows:
+
+\begin{equation}
+    \label{eq:plenum_net_rate_heat_flow_radiation}
+    q_{1 \rightarrow 2} = A_{1}{\overline{F}}_{1 \rightarrow 2}\sigma\left( {T_{1}}^{4} - {T_{2}}^{4} \right)
+\end{equation}
+
+Where, 
+    \ind{   \(q_{1 \rightarrow 2}\) is the net rate of heat flow by radiation between bodies \(1\) 
+    and \(2\).}
+
+The gray body factor, \({\overline{F}}_{1 \rightarrow 2}\), is related to the geometrical view
+factor, \(F_{1 \rightarrow 2}\), from body \(1\) to body \(2\) by
+
+\begin{equation}
+    \label{eq:plenum_gray_body_view_factor}
+    A_{1}{\overline{F}}_{1 \rightarrow 2} = \frac{1}{\frac{1 - \varepsilon_{1}}{A_{1}\varepsilon_{1}} + \frac{1}{A_{1}F_{1 \rightarrow 2}} + \frac{1 - \varepsilon_{2}}{A_{2}\varepsilon_{2}}}
+\end{equation}
+
+Using Equations~\ref{eq:plenum_net_rate_heat_flow_radiation}
+and~\ref{eq:plenum_gray_body_view_factor} and approximating the geometric view factor from the
+cladding to the spring, \(F_{cl - s}\), by
+
+\begin{equation}
+    \label{eq:plenum_view_factor_cladding_spring}
+    F_{cl - s} = \frac{A_{SS}}{2A_{cl}} + \frac{\left( 2A_{cl} - A_{SS} \right)A_{SS}}{4{A_{cl}}^{2}}
+\end{equation}
+
+The net radiation energy exchange between the cladding and spring may be written as
+
+\begin{equation}
+    \label{eq:plenum_net_radiation_cladding_spring}
+    q_{cl - s} = A_{cl}{\overline{F}}_{cl - s}\left( {T_{cli}}^{4} - {T_{SS}}^{4} \right)
+\end{equation}
+
+The radiation heat transfer coefficients, $h_{radc}$ and $h_{rads}$, are calculated by
+Equations~\ref{eq:plenum_radiation_hradc} and~\ref{eq:plenum_radiation_hrads}.
+
+\begin{equation}
+    \label{eq:plenum_radiation_hradc}
+    h_{radc} = \frac{q_{cl - s}\left( T_{cli} - T_{SS} \right)}{A_{cl}}
+\end{equation}
+
+\begin{equation}
+    \label{eq:plenum_radiation_hrads}
+    h_{rads} = h_{radc}\frac{A_{cl}}{A_{SS}}
+\end{equation}
+%-------------------------------------------------------------------------%
+% Gamma Heating of the Spring and Cladding                                %
+%-------------------------------------------------------------------------%
+\subsubsection{Gamma Heating of the Spring and Cladding}\label{gamma-heating-of-the-spring-and-cladding}
+
+The volumetric power generation term, \(q\), used in Equation~\ref{eq:plenum_temp_calc_spring_center_node}
+through~\ref{eq:plenum_temp_calc_clad_central_node}, represents the gamma radiation heating of the spring and
+cladding. A simple relationship is used to calculate \(q\). The
+relationship used is derived from the gamma flux attenuation equation:
+
+\begin{equation}
+    \label{eq:gamma_flux_attenuation}
+    -dI\left( x \right) = \Sigma_{\gamma}I\left( x \right)dx
+\end{equation}
+
+Where,
+\ind{   $I\left( x \right)  =    $  Gamma flux                                                            }
+\ind{   $\Sigma_{\gamma}    =    $  Gamma ray absorption coefficient                                      }
+\ind{   $x                  =    $  Spatial dimension of solid on which the gamma radiation is incident   }
+
+Because the cladding and spring are thin in cross-section, the gamma ray flux can be assumed
+constant throughout the volume. Of the gamma flux, \(I\), incident on the spring and cladding, the
+portion absorbed, \(\mathrm{\Delta}I\), can be described by
+
+\begin{equation}
+    \label{eq:gamma_flux_absorbed}
+    -\mathrm{\Delta}I = \Sigma_{\gamma}I\overline{x}
+\end{equation}
+
+Where,
+\ind{   \(\overline{x}\) is the thickness of the spring or cladding.}
+Therefore, the volumetric gamma ray absorption rate is given by
+
+\begin{equation}
+    \label{eq:volumetric_gamma_ray_absorption_rate}
+    -\frac{\mathrm{\Delta}I}{\overline{x}} = \Sigma_{\gamma}I
+\end{equation}
+
+Equation~\ref{eq:volumetric_gamma_ray_absorption_rate} can also represent gamma volumetric energy
+deposition by letting $I$ represent the energy flux associated with the gamma radiation.
+Approximately 10\percent of the energy released by the fission of uranium is in the form of
+high-energy gamma radiation.  Therefore, the gamma energy flux leaving the fuel rod would be
+approximately equal to 10\percent of the thermal flux. The gamma energy flux throughout the reactor
+can then be estimated by
+
+\begin{equation}
+    \label{eq:gamma_energy_reactor}
+    I = 0.10{\overline{q}}_{rod}
+\end{equation}
+
+Where,
+
+\ind{   \({\overline{q}}_{rod}\) is the average fuel rod power \sinum{kW/m}.    } 
+
+For zirconium, \(\Sigma_{\gamma}\) is approximately \SInum{36.1}{1/m}. Therefore, the gamma energy
+deposition rate is given by Equation~\ref{eq:gamma_energy_plenum_spring}. This is an estimate of the
+gamma heating rate for the spring and cladding.
+
+\begin{equation}
+    \label{eq:gamma_energy_plenum_spring}
+    -\frac{\mathrm{\Delta}I}{\overline{x}} = \overline{q} = 3.61{\overline{q}}_{\text{rod}}
+\end{equation}
+
+%-------------------------------------------------------------------------%
+% Stored Energy 
+%-------------------------------------------------------------------------%
+\subsection{Stored Energy}\label{section:stored-energy}
+
+The stored energy in the fuel rod is calculated separately for the fuel and the cladding, by summing
+the energy of each pellet or cladding ring calculated at the ring temperature. The expression for
+stored energy is shown in Equation~\ref{eq:stored_energy}.
+
+\begin{equation}
+    \label{eq:stored_energy}
+    E_{s} = \frac{\sum_{i = 1}^{I}{m_{i}\int_{T_{\text{ref}}}^{T_{i}}{C_{p}\left( T \right)\text{d}T}}}{m}
+\end{equation}
+
+Where,
+\ind{   $E_{s}                      = $    Stored energy                                \sinum{J/kg}    }
+\ind{   $m_{i}                      = $    Mass of ring segment $i$                     \sinum{kg}      }
+\ind{   $T_{i}                      = $    Temperature of ring segment $i$              \sinum{K}       }
+\ind{   $T_{\text{ref}}             = $    Reference temperature for stored energy      \sinum{K}       }
+\ind{   $C_{p}\left( T \right)      = $    Specific heat evaluated at temperature $T$   \sinum{J/kg-K}  }
+\ind{   $m                          = $    Total mass of the axial node                 \sinum{kg}      }
+\ind{   $I                          = $    Number of annular rings                            }
+
+The stored energy is calculated for each axial node. By default, the reference temperature
+(\(T_{ref}\)) is taken at STP conditions (\SInum{298}{K} or \SInum{77}{\mDF}); however, this can be
+changed using the input file.

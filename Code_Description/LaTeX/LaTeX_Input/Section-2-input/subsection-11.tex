@@ -1,0 +1,104 @@
+\section{Cladding Ballooning Model}\label{section:cladding-ballooning-model}
+
+After the cladding deformation has been calculated by FRACAS-I, a check is made to determine whether
+or not the cladding ballooning model should be used. The check consists of comparing the cladding
+effective plastic strain, which is part of the calculated deformation, with the cladding instability
+strain given by MATPRO (\cite{ref:Hagrman1981a}). If the cladding effective plastic strain is greater
+than the cladding instability strain, the ballooning model, BALON2, is used to calculate the
+localized, non-uniform straining of the cladding. Refer to \cite{ref:Hagrman1981a} for the details of
+the BALON2 model. Once the instability strain is reached in one node, no further strain is
+calculated by FRACAS-I for any nodes. The BALON2 model divides the ballooning node into 12 radial
+and 12 axial subnodes as seen in Figure~\ref{fig:BALON2_image}. For the node that has reached the
+instability strain, the radial average hoop, axial, and radial strains at the axial subnode with the
+maximum hoop strain calculated by BALON2 is used as the hoop, axial, and radial strains for the
+ballooning node.  
+\\
+\\
+BALON2 calculates the extent and shape of the localized large cladding deformation that occurs
+between the time that the cladding effective strain exceeds the instability strain and the time of
+cladding rupture.  The cladding is assumed to consist of a network of membrane elements subjected to
+a pressure difference between the inside surface and the outside surface, as shown in
+Figure~\ref{fig:BALON2_image}. The equations for the model are derived from the thin shell membrane
+equilibrium equation and geometric constraints. In addition, the model calculates the temperature
+rise of the cladding due to heat transfer across the fuel-cladding gap.  The fuel surface is assumed
+to have a non-uniform temperature. The model accounts for the extra cooling the cladding receives as
+it bulges outwardly.
+
+\begin{figure}
+    \includegraphics[height=\figheight\textheight]{../media/image144}
+    \caption{Description of the BALON2 Model}
+    \label{fig:BALON2_image}
+\end{figure}
+
+The BALON2 model predicts failure in the ballooning node when the cladding true hoop stress exceeds
+an empirical limit that is a function of temperature. This correlation is shown in
+Figure~\ref{fig:BALON2_hoop_stress_at_burst}. Although the data shown in the figure are all from
+Zircaloy, this model is used in FAST-1.0 for Zircaloy-2, Zircaloy-4, ZIRLO\TM, Optimized ZIRLO\TM
+and M5\TM.  Using this limit, FAST predicts failure well when compared to measured engineering burst
+stress at various temperature levels. However, in some cases the calculated failure strain is very
+large. To avoid this, a second empirical strain limit was added such that FAST will predict failure
+in the ballooning node when the true hoop stress exceeds the stress limit in BALON2, or when the
+predicted cladding permanent hoop strain exceeds the FAST strain limit. The FAST strain limit is
+provided in Equations~\ref{eq:Zirc_balloon_fail_strain_limit_1}
+through~\ref{eq:Zirc_balloon_fail_strain_limit_3}.
+
+\begin{itemize}
+    \item
+        For \(\SInum{940}{K} \leq T < \SInum{1200}{K}\):
+        \begin{equation}
+            \label{eq:Zirc_balloon_fail_strain_limit_1}
+            \varepsilon_{fail} = \num{1.58797E- 9}T^{4} - \num{6.692798E- 6}T^{3} + \num{1.053049E- 2}T^{2} - 7.331051T + 1906.22
+        \end{equation}
+    \item
+        For \(\SInum{1200}{K} \leq T < \SInum{1700}{K}\):
+        \begin{equation}
+            \label{eq:Zirc_balloon_fail_strain_limit_2}
+            \varepsilon_{\text{fail}} = - \num{1.67939E- 8}T^{3} + \num{6.23050E- 5}T^{2} - \num{7.360497E- 2}T + 28.1199
+        \end{equation}
+    \item
+        For \(T \geq \SInum{1700}{K}\):
+        \begin{equation}
+            \label{eq:Zirc_balloon_fail_strain_limit_3}
+            \varepsilon_{\text{fail}} = 0.544589
+        \end{equation}
+\end{itemize}
+
+Where
+\ind{    $\varepsilon_{\text{fail}}$    =    Plastic strain at failure \sinum{m/m}  }
+\ind{    $T$                            =    Cladding temperature      \sinum{K}    }
+
+\begin{figure}
+    \includegraphics[height=\figheight\textheight]{../media/BALON2_hoop_stress}
+    \caption{True Hoop Stress at Burst used in FAST-1.0's implementation of BALON2}
+    \label{fig:BALON2_hoop_stress_at_burst}
+\end{figure}
+
+With these two limits in place, FAST predictions agree with both cladding failure stress and strain
+data. The predictions also agree with or bound the previously published curves from NUREG-0630
+(\cite{ref:Powers1980}). These comparisons are shown in
+Figures~\ref{fig:BALON2_burst_stress_low_heating_rate}
+through~\ref{fig:BALON2_burst_strain_high_heating_rate} for different temperature ramp rates.
+
+\begin{figure}
+    \includegraphics[height=\figheight\textheight]{../media/Zircaloy_burst_stress_low_heating_rate}
+    \caption{Engineering Burst Stress Data and FAST Predictions for Low Heating Rates}
+    \label{fig:BALON2_burst_stress_low_heating_rate}
+\end{figure}
+
+\begin{figure}
+    \includegraphics[height=\figheight\textheight]{../media/Zircaloy_burst_stress_high_heating_rate}
+    \caption{Engineering Burst Stress Data and FAST Predictions for High Heating Rates}
+    \label{fig:BALON2_burst_stress_high_heating_rate}
+\end{figure}
+
+\begin{figure}
+    \includegraphics[height=\figheight\textheight]{../media/Zircaloy_burst_strain_low_heating_rate}
+    \caption{Permanent Burst Strain Data and FAST Predictions for Low Temperature Ramp Rates (between 2 and \SInum{10}{\mDC}/s)}
+    \label{fig:BALON2_burst_strain_low_heating_rate}
+\end{figure}
+
+\begin{figure}
+    \includegraphics[height=\figheight\textheight]{../media/Zircaloy_burst_strain_high_heating_rate}
+    \caption{Permanent Burst Strain Data and FAST Predictions for High Temperature Ramp Rates (greater than \SInum{20}{\mDC}/s)}
+    \label{fig:BALON2_burst_strain_high_heating_rate}
+\end{figure}

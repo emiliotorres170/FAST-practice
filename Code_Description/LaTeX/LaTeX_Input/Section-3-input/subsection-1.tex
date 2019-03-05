@@ -1,0 +1,179 @@
+\section{Heat Conduction Equation} \label{section:heat_cond_eq}
+The numerical solution of the heat conduction Equation \ref{eq:one_d_heat_conduction_radial_tr}
+requires solving a set of tri-diagonal equations. This set of equations is shown as follows:
+\begin{equation}
+    \label{eq:heat_cond_eq_tridiagonal}
+    \begin{bmatrix}
+        b_{1}   &   c_{1}   &   0       &  0        &   \dots     &   0         \\
+        a_{2}   &   b_{2}   &   c_{2}   &  0        &   \dots     &   0         \\
+        0       &   a_{3}   &   b_{3}   &  c_{3}    &   \dots     &   0         \\
+        \vdots  &   \hdots  &   \ddots  &  \ddots   &   \ddots    &   \vdots    \\
+        \vdots  &   \hdots  &   0       &  a_{N-1}  &   b_{N-1}   &   c_{N-1}   \\
+        0       &   \hdots  &   \vdots  &   0       &   a_{N}     &     b_{N}   \\  
+    \end{bmatrix}
+    \begin{bmatrix}
+        T_{1}^{m+1}         \\
+        T_{2}^{m+1}         \\
+        T_{3}^{m+1}         \\
+        \vdots              \\
+        \vdots              \\
+        T_{N-1}^{m+1}       \\
+        T_{N}^{m+1}         \\
+    \end{bmatrix}
+    =
+    \begin{bmatrix}
+        d_{1}               \\
+        d_{2}               \\
+        d_{3}               \\
+        \vdots              \\
+        \vdots              \\
+        d_{N-1}             \\
+        d_{N}               \\
+    \end{bmatrix}
+\end{equation}
+
+Where,
+\ind{	$a_{n}$, $\ b_{n}$, $c_{n}$, $d_{n}$    =  Terms of the heat conduction equation in finite difference form at the $n-th$ mesh point}	
+\ind{	$T_{N}^{m + 1}$                               =  Temperature at $n$-th mesh point at time step $m$+1}	
+\ind{	$N$                                           =  Number of mesh point at outer surface}	
+
+The mesh point temperatures are solved by the Gaussian elimination method.
+
+\begin{equation}
+    \label{eq:heat_Tn_Gaussian}
+    T_{N}^{m + 1} = \frac{d_{n} - a_{n}F_{n - 1}}{b_{n} - a_{n}E_{n - 1}}
+\end{equation}
+
+\begin{equation}
+    \label{eq:heat_Tj_Gaussian}
+    T_{j}^{m + 1} = - E_{j}T_{j + 1}^{m + 1} + F_{j}
+\end{equation}
+
+Where,
+\begin{subequations}
+    \begin{equation}
+        E_{1} = \frac{c_{1}}{b_{1}}  
+        \label{eq:heat-Gaussian-E}
+    \end{equation}
+    \begin{equation}
+        F_{1} = \frac{d_{1}}{b_{1}} 
+        \label{eq:heat-Gaussin-F}
+    \end{equation}
+\end{subequations}
+
+And,
+
+\begin{subequations}
+    \begin{equation}
+        E_{j} = \frac{c_{j}}{b_{j} - a_{j}E_{j - 1}} \text{\hspace{8pt}for $j=1,2,3\ldots, n-1$}
+    \end{equation}
+    \begin{equation}
+        F_{j} = \frac{d_{j} - a_{j}F_{j - 1}}{b_{j} - a_{j}E_{j - 1}} \text{\hspace{8pt}for $j=1,2,3\ldots, n-1$} 
+    \end{equation}
+    \label{eq:heat-Gaussian-E-F-j}
+\end{subequations}
+
+The coefficients \(a_{n}\), \(b_{n}\), and \(d_{n}\) in Equation~\ref{eq:heat_Tn_Gaussian} are derived from the energy balance equation
+for the half mesh interval bordering the outside surface. The continuous
+form of the energy balance equation for this half mesh interval is:
+
+\begin{equation}
+    \label{eq:heat_continuous_form_energy_balance}
+    \rho C_{p}\mathrm{\Delta}V\frac{\partial T}{\partial t} = - A_{n - \frac{1}{2}}K\left. \ \frac{\partial T}{\partial t} \right|_{r = r_{n} - \frac{\mathrm{\Delta}r}{2}}^{- \theta A_{n} + q\mathrm{\Delta}V}
+\end{equation}
+
+Where all the terms in Equation~\ref{eq:heat_continuous_form_energy_balance} are defined below.
+
+The finite difference form of Equation~\ref{eq:heat_continuous_form_energy_balance} is
+\begin{equation}  
+    \label{eq:heat_fd_form}
+    \begin{aligned}
+        \underbrace{\frac{-0.5 A_{n-\frac{1}{2}} K}{\Delta r}}_{a_{n}} T^{m+1}_{n} + &
+    \left[\underbrace{\frac{\rho C_{p} \Delta V}{\Delta t} + \frac{0.5A_{n-\frac{1}{2}} K}{\Delta r}}_{b_{n}} T^{m+1}_{n}\right]       \\
+        & \underbrace{\frac{\rho C_{p} \Delta V}{\Delta r} T^{m}_{n} \frac{-0.5A_{n-\frac{1}{2}} K}{\Delta r} \left(T_{n}^{m} - T_{n-1}^{m}\right)-0.5A_{n}\left(\theta^{m} + \theta^{m+1}\right)+q^{m+\frac{1}{2}} \Delta V}_{d_{n}}
+    \end{aligned}
+\end{equation}  
+
+The complete expressions for coefficients $a_{n}$, $b_{n}$, and $d_{n}$ are then:
+\begin{subequations}
+    \begin{equation}
+        a_{n} = \frac{- 0.5A_{n - \frac{1}{2}}K}{\mathrm{\Delta}r}
+    \end{equation}
+    \begin{equation}
+        b_{n} = \frac{\rho C_{p}\mathrm{\Delta}V}{\mathrm{\Delta}t} + \frac{0.5A_{n - \frac{1}{2}}K}{\mathrm{\Delta}r}
+    \end{equation}
+    \begin{equation}
+        d_{n} = \frac{\rho C_{p}\mathrm{\Delta}V}{\mathrm{\Delta}r}T_{n}^{m}\frac{- 0.5A_{n - \frac{1}{2}}K}{\mathrm{\Delta}r}\left( T_{n}^{m} - T_{n - 1}^{m} \right) - 0.5A_{n}\left( \theta^{m} + \theta^{m + 1} \right) + q^{m + \frac{1}{2}}\mathrm{\Delta}V
+    \end{equation}
+    \begin{equation}
+        A_{n - \frac{1}{2}} = 2\pi\left( r_{n} - \frac{\mathrm{\Delta}r}{2} \right)
+    \end{equation}
+    \begin{equation}
+        A_{n} = 2\pi r_{n}
+    \end{equation}
+    \begin{equation}
+        V = \pi\left( r_{n}\mathrm{\Delta}r - \frac{\mathrm{\Delta}r^{2}}{4} \right)
+    \end{equation}
+\end{subequations}
+
+Where,
+\ind{	$K$                     =  Thermal conductivity of material in half mesh interval bordering the surface}		
+\ind{	$C_{p}$                 =  Specific heat of material in half mesh interval bordering the surface}		
+\ind{	$\rho$                  =  Density of material in half mesh interval bordering the surface}		
+\ind{	$r_{n}$                 =  Radius to outside surface}		
+\ind{	$\mathrm{\Delta}r$      =  Width of mesh interval bordering outside surface}		
+\ind{	$\mathrm{\Delta}t$      =  Time step}		
+\ind{	$\theta^{m}$            =  Surface heat flux at $m$-th time step}		
+\ind{	$T_{n}^{m}$             =  Surface temperature at $m$-th time step}		
+\ind{	$q^{m - \frac{1}{2}}$   =  Heat generation rate in half mesh interval bordering outside surface (heat generation caused by cladding oxidation)}  	
+
+Because the coefficients $a_{n}$, $b_{n}$, $d_{n}$, $E_{n - 1}$ and $F_{n - 1}$ in
+Equation~\ref{eq:heat_Tn_Gaussian} do not contain temperature, the equation can be written as
+follows:
+
+\begin{equation}
+    \label{eq:heat_A1Tn_B1_theta}
+    A_{q}T_{n}^{m + 1} + B_{q} = \theta^{m + 1}
+\end{equation}
+
+Where,
+
+\begin{equation}
+    \label{eq:heat_A1}
+    A_{1} = \frac{- \left( b_{n} - a_{n}E_{n - 1} \right)}{0.5A_{n}}
+\end{equation}
+
+\begin{equation}
+    \label{eq:heat_B1}
+    B_{1} = - \left\lbrack \frac{0.5\theta^{m}A_{n} + a_{n}F_{n - 1} - \frac{\rho C_{p}}{\mathrm{\Delta}t}\mathrm{\Delta}VT_{n}^{m} - a_{n}\left( T_{n}^{m} - T_{n - 1}^{m} \right) - q^{m - \frac{1}{2}}\mathrm{\Delta}V}{0.5A_{n}} \right\rbrack
+\end{equation}
+
+As shown in Equation~\ref{eq:heat_Tn_Gaussian}, the coefficients $E_{n - 1}$ and $F_{n - 1}$ are
+evaluated by forward reduction of Equation~\ref{eq:heat_cond_eq_tridiagonal}.  Therefore,
+Equation~\ref{eq:heat_A1Tn_B1_theta} contains only $T_{n}^{m + 1}$ and $\theta^{m + 1}$ as unknown
+quantities.
+
+Empirically derived clad-to-coolant heat transfer correlations are available from which the surface
+heat flux due to convection can be calculated in terms of surface temperature, geometric parameters,
+and flow conditions. Also, the equation for radiation heat transfer from a surface to surrounding
+water is known. Thus, the total surface heat flux can be expressed by the equation
+\begin{equation}
+    \label{eq:heat_theta_m1}
+    \theta^{m + 1} = f_{i}\left( C,G,T_{n}^{m + 1} \right) + \sigma F_{A}F_{E}\left\lbrack {(T_{n}^{m + 1})}^{4} - {T_{w}}^{4} \right\rbrack
+\end{equation}
+
+Where,
+\ind{	$\theta^{m + 1}$                =   	Surface heat flux at time step m+1}
+\ind{	$f_{i}\left( \hspace{5pt} \right)$    =   	Function specifying rate at which heat is
+transferred from surface by convention heat transfer during heat transfer mode $i$ (These functions are defined in \colorbox{yellow}{Section~D.6 of Appendix D.)}}
+\ind{	$i$                             =   	Number identification of convective heat transfer mode (nucleate boiling, film boiling, etc.)}
+\ind{	$C$                             =   	Set of parameters describing coolant conditions}
+\ind{	$G$                             =   	Set of parameters describing geometry}
+\ind{	$\sigma$                        =   	Stefan-Boltzmann constant}
+\ind{	$F_{A}$                         =   	Configuration factor for radiation heat transfer}
+\ind{	$F_{E}$                         =   	Emissivity factor for radiation heat transfer}
+\ind{	$T_{w}$                         =   	Bulk temperature of water surrounding fuel rod surface}
+
+Equations~\ref{eq:heat_A1Tn_B1_theta} and ~\ref{eq:heat_theta_m1} are two independent equations with
+unknowns $T_{n}^{m + 1}$ and $\theta^{m + 1}$. Simultaneous solution of the two equations yields the
+new surface temperature $T_{n}^{m + 1}$.

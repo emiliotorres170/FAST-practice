@@ -1,0 +1,1628 @@
+%-------------------------------------------------------------------------%
+% Section 2.5 Fuel Rod Mechanical Response
+%-------------------------------------------------------------------------%
+\section{Fuel Rod Mechanical Response}\label{section:fuel-rod-mechanical-response}
+
+An accurate calculation of fuel and cladding deformation is necessary in any fuel rod response
+analysis because the heat transfer coefficient across the fuel-cladding gap is a function of both
+the effective fuel-cladding gap size and the fuel-cladding interfacial pressure. In addition, an
+accurate calculation of stresses in the cladding is needed to accurately calculate the strain and
+the onset of cladding failure (and subsequent release of fission products). This section describes
+the default mechanical model, FRACAS-I. The optional cladding FEA model is described elsewhere
+(\cite{ref:Knuutila2006a}).
+
+%-------------------------------------------------------------------------%
+% Section 2.5.1 The FRACAS-1 Model
+%-------------------------------------------------------------------------%
+
+\subsection{The FRACAS-1 Model}\label{section:the-fracas-1-model}
+
+The FRACAS-I model is available for the calculation of the small displacement deformation of the
+fuel and cladding. The simplified model, FRACAS-I, neglects the stress-induced deformation of the
+fuel, and is called the ``rigid pellet model.''
+\\
+\\
+In analyzing the deformation of fuel rods, two physical situations are envisioned. The first
+situation occurs when the fuel and cladding are not in contact. Here the problem of a cylindrical
+shell (the cladding) with specified internal and external pressures and a specified cladding
+temperature distribution must be solved. This situation is called the ``open gap'' regime.
+\\
+\\
+The second situation envisioned is when the fuel (considerably hotter than the cladding) has
+expanded so as to be in contact with the cladding. Further heating (thermal expansion) of the fuel
+``drives'' the cladding outward. This situation is called the ``closed gap'' regime. In addition,
+this closed gap can occur due to fuel swelling, relocation, and the creep of the cladding onto the
+fuel due to a high coolant pressure.
+\\
+\\
+The deformation analysis in FAST consists of a small deformation analysis that includes stresses,
+strains, and displacements in the fuel and cladding for the entire fuel rod. This analysis assumes
+that the cladding retains its cylindrical shape during deformation, and includes the effects of the
+following:
+
+\begin{itemize}
+    \item Fuel thermal expansion, swelling, densification, and relocation
+
+    \item Cladding thermal expansion, creep, and plasticity
+
+    \item Fission gas and external coolant pressures
+
+\end{itemize}
+
+As part of the small displacement analysis, the applicable local deformation regime (open gap, or
+closed gap) is determined. Finally, an analysis is performed to determine cladding stresses and
+strains.
+\\
+\\
+In Section~\ref{section:general-theory-and-method-of-solution}, the general theory of plastic
+analysis is outlined and the method of solution used in the FRACAS-I model is presented. This method
+of solution is used in the rigid pellet model. In
+Section~\ref{section:rigid-pellet-cladding-deformation-model}, the equations for the rigid pellet
+model are described.
+%-------------------------------------------------------------------------%
+% Section 2.5.1.1 General Theory and Method of Solution
+%-------------------------------------------------------------------------%
+\subsubsection{General Theory and Method of Solution}\label{section:general-theory-and-method-of-solution}
+
+The general theory of plastic analysis and the method of solution are
+used in the rigid pellet model.
+
+\subsubsection{General Considerations in Elastic-Plastic Analysis}\label{section:general-considerations-in-elastic-plastic-analysis}
+
+Problems involving elastic-plastic deformation and multiaxial stress states involve aspects that do
+not require consideration in a uniaxial problem. In the following discussion, an attempt is made to
+briefly outline the structure of incremental plasticity and to outline the method of successive
+substitutions (also called the method of successive elastic solutions) (\cite{ref:Mendelson1968a}),
+which has been used successfully in treating multiaxial elastic-plastic problems. The method can be
+used for any problem for which a solution based on elasticity can be obtained.  This method is used
+in the rigid pellet model.
+\\
+\\
+In a problem involving only uniaxial stress, \(\sigma_{1}\), the strain, \(\varepsilon_{1}\), is
+related to the stress by an experimentally determined stress-strain curve as shown in
+Figure~\ref{fig:isothermal_stress_strain_curve} (including the elastic strains and plastic strains,
+but without thermal expansion strains) so Hooke's law is taken as:
+
+\begin{equation}
+    \label{eq:hooks_law}
+    \varepsilon_{1} = \frac{\sigma_{1}}{E} + \varepsilon_{1}^{P} + \int_{}^{}\alpha dT
+\end{equation}
+
+Where,
+        \ind{   $\varepsilon_{1}^{P}  = $ Stored energy                 \sinum{J/kg}  }
+        \ind{   $E                    = $ Mass of ring segment $i$      \sinum{kg}    }
+
+The onset of yielding occurs at the yield stress, which can be determined directly from
+Figure~\ref{fig:isothermal_stress_strain_curve}. Given a load (stress) history, the resulting
+deformation can be determined in a simple manner. The increase of yield stress with work-hardening
+is easily computed directly from Figure~\ref{fig:isothermal_stress_strain_curve}.
+\\
+\\
+In a problem involving multiaxial states of stress, as with a fuel rod, the situation is not as
+clear. In such a problem, a method of relating the onset of plastic deformation to the results of a
+uniaxial test is required, and further, when plastic deformation occurs, some means is needed for
+determining how much plastic deformation has occurred and how that deformation is distributed among
+the individual components of strain. These two complications are taken into account by use of the
+so-called ``yield function'' and ``flow rule,'' respectively.
+\\
+\\
+A wealth of experimental evidence exists on the onset of yielding in a multiaxial stress state. Most
+of this evidence supports the von Mises yield criterion, which asserts that yielding occurs when the
+stress state is such that
+
+\begin{equation}
+    {\sigma_{y}}^{2} = \frac{1}{2}\left\lbrack \left( \sigma_{1} -
+    \sigma_{2} \right)^{2} + \left( \sigma_{2} - \sigma_{3} \right)^{2} +
+    \left( \sigma_{3} - \sigma_{1} \right)^{2} \right\rbrack
+    \label{eq:von_mises_yield_criterion}
+\end{equation}
+
+Where,
+\ind{   \(\sigma_{i}\)  =  Principle stresses in direction \(i,i = 1,2,3\)                }
+\ind{   \(\sigma_{y}\)  =  Yield stress as determined in a uniaxial stress-strain test.   }
+
+The square root of the left side of Equation~\ref{eq:von_mises_yield_criterion} is referred to as
+the ``effective stress,'' \(\sigma_{e}\), and this effective stress is one commonly used type of yield
+function.
+\\
+\\
+To determine how the yield stress changes with permanent deformation, the yield stress is
+hypothesized to be a function of the equivalent plastic strain, \(\varepsilon^{p}\). An increment of
+equivalent plastic strain is determined at each load step, and \(\varepsilon^{p}\) is defined as the
+sum of all increments incurred, as shown in Equation~\ref{eq:sum_plastic_strain_increments}.
+
+\begin{figure}
+    \includegraphics[height=\figheight\textheight]{../media/image15}
+    \caption{Typical Isothermal Stress-Strain Curve \colorbox{yellow}{Should consider updating}}
+    \label{fig:isothermal_stress_strain_curve}
+\end{figure}
+
+\begin{equation}
+    \label{eq:sum_plastic_strain_increments}
+    \varepsilon^{p} = \sum_{}^{}{d\varepsilon^{p}}
+\end{equation}
+
+Each increment of effective plastic strain is related to the individual plastic strain components by
+
+\begin{equation}
+    \label{eq:eff_plastic_strain_to_individual_plastic_strain}
+    d\varepsilon^{p} = \frac{\sqrt{2}}{3}\sqrt{\left( \varepsilon_{1}^{p} - d\varepsilon_{2}^{p} \right)^{2} + \left( d\varepsilon_{2}^{p} - d\varepsilon_{3}^{p} \right)^{2} + \left( d\varepsilon_{3}^{p} - d\varepsilon_{1}^{p} \right)^{2}}
+\end{equation}
+
+Where,
+\ind{   $d\varepsilon_{i}^{p}  = $ Plastic strain components in principle coordinates }
+
+Experimental results indicate that at pressures on the order of the yield stress, plastic
+deformation occurs with no change in volume, which implies that
+
+\begin{equation}
+    d\varepsilon_{1}^{p} + d\varepsilon_{2}^{p} + d\varepsilon_{3}^{p} = 0
+    \label{eq:plastic_deformation_no_volume_change}
+\end{equation}
+
+Therefore, in a uniaxial test with $\sigma_{1}=\sigma$, $\sigma_{2}=\sigma_{3}= 0$, the plastic
+strain increments are
+
+\begin{equation}
+    \label{eq:plastic_strain_increment_uniaxial_test}
+    d\varepsilon_{2}^{p} = d\varepsilon_{3}^{p} = - \frac{1}{2}d\varepsilon_{1}^{p}
+\end{equation}
+
+Therefore, in a uniaxial test, Equations~\ref{eq:von_mises_yield_criterion}
+and~\ref{eq:eff_plastic_strain_to_individual_plastic_strain} reduce to
+
+\begin{equation}
+    \label{eq:stress_equals_yield_stress}
+    \sigma = \sigma_{y}
+\end{equation}
+
+\begin{equation}
+    \label{eq:plastic_strain_equals_dep1}
+    d\varepsilon^{p} = d\varepsilon_{1}^{p} 
+\end{equation}
+
+Thus, when the assumption is made that the yield stress is a function of the total effective plastic
+strain (called the ``strain-hardening hypothesis''), the functional relationship between yield
+stress and plastic strain can be taken directly from a uniaxial stress-strain curve by virtue of
+Equations~\ref{eq:stress_equals_yield_stress} and~\ref{eq:plastic_strain_equals_dep1}.
+
+The relationship between the magnitudes of the plastic strain increments and the effective plastic
+strain increment is provided by the Prandtl-Reuss flow rule:
+
+\begin{equation}
+    \label{eq:prandtl_reuss_flow_rule}
+    d\varepsilon_{i}^{p} + \frac{3}{2}\frac{d\varepsilon_{1}^{p}}{\sigma_{e}}S_{i},\; i = 1,\; 2,\; 3
+\end{equation}
+
+Where,
+\ind{   \(S_{i}\) values are the deviatoric stress components (in principal coordinates)} 
+Furthermore, the deviatoric stress components, $S_{i}$, are defined by
+\begin{equation}
+    S_{i} = \sigma_{i} - \frac{1}{3}\left( \sigma_{1} + \sigma_{2} + \sigma_{3} \right),\ i = 1,\ 2,\ 3
+    \label{eq:deviatoric_stress_components}
+\end{equation}
+
+Equation~\ref{eq:prandtl_reuss_flow_rule} embodies the fundamental observation of plastic
+deformation; that is, plastic strain increments are proportional to the deviatoric stresses. The
+constant of proportionality is determined by the choice of the yield function. Direct substitution
+shows that
+Equations~\ref{eq:von_mises_yield_criterion},~\ref{eq:eff_plastic_strain_to_individual_plastic_strain},~\ref{eq:prandtl_reuss_flow_rule},
+and~\ref{eq:deviatoric_stress_components} are consistent with one another.
+\\
+\\
+Once the plastic strain increments have been determined for a given load step, the total strains are
+determined from a generalized form of Hooke's law given by
+
+\begin{subequations}
+    \begin{equation}
+        \varepsilon_{1} = \frac{1}{E}\left( \sigma_{1} - \nu\left( \sigma_{2} + \sigma_{3} \right) \right) + \varepsilon_{1}^{p} + d\varepsilon_{1}^{p} + \int_{}^{}{\alpha_{1}\text{dt}}  \\
+        \label{eq:total_strains_hooks_law-1}
+    \end{equation}
+    \begin{equation}
+        \varepsilon_{2} = \frac{1}{E}\left( \sigma_{2} - \nu\left( \sigma_{1} + \sigma_{3} \right) \right) + \varepsilon_{2}^{p} + d\varepsilon_{2}^{p} + \int_{}^{}{\alpha_{2}\text{dt}}  \\
+        \label{eq:total_strains_hooks_law-2}
+    \end{equation}
+    \begin{equation}
+        \varepsilon_{3} = \frac{1}{E}\left( \sigma_{3} - \nu\left( \sigma_{2} + \sigma_{1} \right) \right) + \varepsilon_{3}^{p} + d\varepsilon_{3}^{p} + \int_{}^{}{\alpha_{3}\text{dt}}
+        \label{eq:total_strains_hooks_law-3}
+    \end{equation}
+    \label{eq:total_strains_hooks_law}
+\end{subequations}
+    
+%\begin{equation}
+%    \label{eq:total_strains_hooks_law}
+%    \begin{aligned}
+%       \varepsilon_{1} = \frac{1}{E}\left( \sigma_{1} - \nu\left( \sigma_{2} + \sigma_{3} \right) \right) + \varepsilon_{1}^{p} + d\varepsilon_{1}^{p} + \int_{}^{}{\alpha_{1}\text{dt}}  \\
+%       \varepsilon_{2} = \frac{1}{E}\left( \sigma_{2} - \nu\left( \sigma_{1} + \sigma_{3} \right) \right) + \varepsilon_{2}^{p} + d\varepsilon_{2}^{p} + \int_{}^{}{\alpha_{2}\text{dt}}  \\
+%       \varepsilon_{3} = \frac{1}{E}\left( \sigma_{3} - \nu\left( \sigma_{2} + \sigma_{1} \right) \right) + \varepsilon_{3}^{p} + d\varepsilon_{3}^{p} + \int_{}^{}{\alpha_{3}\text{dt}}
+%    \end{aligned}
+%\end{equation}
+
+Where,
+\ind{   $\varepsilon_{i}^{p}  =$  Total plastic strain components at the end of the previous load increment }
+\ind{   $E                    =$  Modulus of elasticity (See MatLib)                                        }
+\ind{   $\nu                  =$  Poisson's ratio (See MatLib)                                              }
+
+The remaining continuum field equations of equilibrium, strain displacement, and strain
+compatibility are unchanged. The complete set of governing equations is presented in
+Table~\ref{tab:summary_FRACAS1_governing_equations}, written in terms of rectangular Cartesian
+coordinates and employing the usual indicial notation in which a repeated Latin index implies
+summation (index notation). This set of equations is augmented by an experimentally determined
+uniaxial stress-strain relation.
+
+\renewcommand{\captiontext}{Summary of FRACAS-I Governing Equations}
+\begin{longtable}[c]{|D{1.0in}A{5.0in}|}
+    \caption{\captiontext} \label{tab:summary_FRACAS1_governing_equations}                      \\  \hline
+    \endfirsthead
+    \caption{\captiontext~(continued)} \\   \hline
+    \endhead
+        \multicolumn{2}{|D{6.0in}|}{\textbf{Equilibrium}}                                       \\  
+        \multicolumn{2}{|A{6.0in}|}{$\sigma_{ji,j} + \rho f_{i} = 0 $}                          \\  \hline
+
+        \multicolumn{2}{|D{6.0in}|}{\textbf{Stress strain}}                                     \\  
+        \multicolumn{2}{|A{6.0in}|}{$\varepsilon{ij} = \frac{1+\nu}{E}\sigma_{ij}-\delta_{ij}\left(\frac{\nu}{E}-\int^{}_{}\alpha dT\right)+\varepsilon_{ij}^{p}+d\varepsilon_{ij}^{p}  $ } \\  \hline
+        
+        \multicolumn{2}{|D{6.0in}|}{\textbf{Compatibility}}                                     \\  
+        \multicolumn{2}{|A{6.0in}|}{$\varepsilon_{ij,kl} + \varepsilon_{kl,ij} -\varepsilon_{ik,jl} - \varepsilon_{jl,ik} = 0 $}    \\  \hline
+        
+        \multicolumn{2}{|D{6.0in}|}{\textbf{Definitions used in plasticity}}                    \\  
+        \multicolumn{2}{|A{6.0in}|}{$\sigma_{e} \triangleq \sqrt{\frac{3}{2}S_{ij}S_{ij}}$}     \\  
+        \multicolumn{2}{|A{6.0in}|}{$S_{ij} \triangleq \sigma_{ij} - \frac{1}{3}\sigma_{kk}$}   \\ \hline
+        
+        \multicolumn{2}{|D{6.0in}|}{\textbf{Prandtl-Reuss flow rule}}                           \\  
+        \multicolumn{2}{|A{6.0in}|}{$d\varepsilon_{ij}^{p} = \frac{3}{2}\frac{d\varepsilon^{p}}{\sigma_{e}}S_{ij}$} \\ \hline
+\end{longtable}
+Where,
+\ind{   $\sigma  =$  stress tensor                           }
+\ind{   $\rho    =$  mass density                            }
+\ind{   $f_{i}   =$  components of body force per unit mass  }
+
+\subsubsection{The Method of Solution} \label{section:method_of_solution}
+
+When the problem under consideration is statically determinate so that stresses can be found from
+equilibrium conditions alone, the resulting plastic deformation can be determined directly. However,
+when the problem is statically indeterminate and the stresses and deformation must be found
+simultaneously, the full set of plasticity equations proves to be quite formidable, even in the case
+of simple loadings and geometries.
+\\
+\\
+One numerical procedure which has been used with considerable success is the method of successive
+substitutions. This method can be applied to any problem for which an elastic solution can be
+obtained, either in closed form or numerically. A full discussion of this technique, including a
+number of technologically useful examples, is contained in \cite{ref:Knuutila2006a}.
+\\
+\\
+Briefly, the method involves dividing the loading path into small increments. For example, in the
+present application, the loads are external pressure, temperature, and either internal pressure or a
+prescribed displacement of the inside surface of the cladding. These loads all vary during the
+operating history of the fuel rod. For each new increment of the loading, the solution to all the
+plasticity equations listed in Table~\ref{tab:summary_FRACAS1_governing_equations} is obtained as
+follows.
+\\
+\\
+First, an initial estimate of the plastic strain increments, \(d\varepsilon_{ij}^{p}\), is made.
+Based on these values, the equations of equilibrium, Hooke's law, and strain-displacement and so
+obtained, the deviatoric stresses, \(S_{ij}\), may be computed. This ``pseudo-elastic'' solution
+represents one path in the computational scheme.
+\\
+\\
+Independently, through use of the assumed \(d\varepsilon_{ij}^{p}\) values, the increment of
+effective plastic strain, \(d\varepsilon^{p}\), may be computed. From this result and the
+stress-strain curve, a value of the effective stress, \(\sigma_{e}\), is obtained from
+Equation~\ref{eq:von_mises_yield_criterion}.
+\\
+\\
+Finally, a new estimate of the plastic strain increments is obtained from the Prandtl-Reuss flow
+rule:
+
+\begin{equation}
+    d\varepsilon_{ij}^{p} = \frac{3}{2}\frac{d\varepsilon^{p}}{\sigma_{e}}S_{ij}
+    \label{eq:new_estimate_prandtl_reuss_flow_rule}
+\end{equation}
+The entire process is continued until the \(d\varepsilon_{ij}^{p}\) converges. A schematic of the
+iteration scheme is shown in Figure~\ref{fig:schematic_method_success_elastic_solns}.
+\\
+\\
+The mechanism by which improved estimates of \(d\varepsilon_{ij}^{p}\) are obtained results from the
+fact that the effective stress obtained from \(d\varepsilon^{p}\) and the stress-strain curve will
+not be equal to the effective stress that would be obtained with the stresses from the elastic
+solution. The effective stresses will only agree when convergence is obtained.
+
+\begin{figure}
+    \includegraphics[height=\figheight\textheight]{../media/image17}
+    \caption{Schematic of the Method of Successive Elastic Solutions \colorbox{yellow}{Should Consider re-making}}
+    \label{fig:schematic_method_success_elastic_solns}
+\end{figure}
+
+The question of convergence is one that cannot, in general, be answered \textit{a priori}. However,
+convergence can be shown to be obtained for sufficiently small load increments. Experience has shown
+that this technique is suitable for both steady-state and transient fuel rod analyses.
+
+\subsubsection{Extension to Creep}\label{section:extension-to-creep}
+
+The method of solution described for the time-independent plasticity calculations can also be used
+for time-dependent creep calculations. In this context, the term ``creep'' refers to any
+time-dependent constant volume permanent deformation. Creep is a stress-driven process and is
+usually highly dependent on temperature.  The only change required to extend the method of
+successive elastic solutions to allow consideration of creep is to rewrite the Prandtl-Reuss flow
+rule, Equation~\ref{eq:prandtl_reuss_flow_rule}, as
+
+\begin{subequations}
+    \begin{equation}
+        d \varepsilon^{c}_{1} = 1.5 \frac{\dot{\varepsilon} \Delta t}{\sigma_{\varepsilon}}S_{1} + \frac{\dot{V^{c}}\Delta t}{9} \frac{\left(\sigma_{1} + \sigma_{2} + \sigma_{3} \right)}{\sigma_{m}} \\ 
+        \label{eq:prandtl_reuss_with_creep-1}
+    \end{equation}
+    \begin{equation}
+        d \varepsilon^{c}_{2} = 1.5 \frac{\dot{\varepsilon} \Delta t}{\sigma_{\varepsilon}}S_{2} + \frac{\dot{V^{c}}\Delta t}{9} \frac{\left(\sigma_{1} + \sigma_{2} + \sigma_{3} \right)}{\sigma_{m}} \\
+        \label{eq:prandtl_reuss_with_creep-2}
+    \end{equation}
+    \begin{equation}
+        d \varepsilon^{c}_{3} = 1.5 \frac{\dot{\varepsilon} \Delta t}{\sigma_{\varepsilon}}S_{3} + \frac{\dot{V^{c}}\Delta t}{9} \frac{\left(\sigma_{1} + \sigma_{2} + \sigma_{3} \right)}{\sigma_{m}} \\
+        \label{eq:prandtl_reuss_with_creep-3}
+    \end{equation}
+    \label{eq:prandtl_reuss_with_creep}
+\end{subequations}
+Where,
+\ind{   \(\sigma_{m}\) is the mean stress.}  
+
+The first term on the right-hand side of each of these equations
+(Equation~\ref{eq:prandtl_reuss_with_creep}) computes the constant volume creep strain, whereas the
+second term in each equation computes the permanent change in volume. To use this form of the flow
+rule, two additional material property correlations must be available. The first is a correlation
+for constant volume creep strain, \(\varepsilon^c\) (taken in a uniaxial test), as a function of
+stress, time, temperature, and neutron flux, namely
+
+\begin{equation}
+    \varepsilon^{c} = f\left(\sigma, T, t, \phi \right)
+    \label{eq:constant_creep_volume_strain}
+\end{equation}
+
+Where,
+\ind{   $\sigma  =$  uniaxial stress \sinum{MPa}                      }
+\ind{   $T       =$  temperature     \sinum{K}                        }
+\ind{   $t       =$  time            \sinum{s}                        }
+\ind{   $\phi    =$  neutron flux    \sinum{n/m^{2}-s} }
+
+In the FRACAS-I model, the strain hardening hypothesis is assumed, which implies that the strain
+correlation can be differentiated with respect to time and solved for creep strain rate in the form
+
+\begin{equation}
+    \label{eq:creep_strain_rate}
+    \dot{\varepsilon} = h\left(\sigma, \varepsilon^{c}, t, T, \phi\right)
+\end{equation}
+
+which is no longer an explicit function of time. The function ``h'' is contained in subroutine
+CREPR, and is described as follows.
+\\
+\\ 
+A model described by Limb\"{a}ck and Andersson (\cite{ref:Limback1996a}) of ABB Atom and AB
+Sandvik Steel, respectively, was selected for cladding irradiation creep in FAST.  This model uses a
+thermal creep model described by \cite{ref:Matsuo1987b} and an empirical irradiation creep rate with
+tuned model parameters that were fit to the data set given by \cite{ref:Franklin1983}. The
+Limb\"{a}ck model was further modified by PNNL to use effective stress rather than hoop stress as an
+input so that the principal stresses could be included and account for the difference in creep
+behavior during tensile and compressive creep.  Several of the fitting coefficients from the
+Limb\"{a}ck paper were consequently changed to accommodate this change based on comparisons to
+several data sets ( \cite{ref:Franklin1983}; \cite{ref:Soniak2002b}; \cite{ref:Gilbon2000a}; and
+\cite{ref:Sontheimer1994}).  In addition, a temperature-dependent term was added to the formula for
+irradiation creep strain rate. This was done because creep data were used with temperature greater
+than the temperature of the data given by Franklin, and these data along with the Franklin data
+showed a dependence on temperature. This model has different parameters for stress relief annealed
+(SRA) and re-crystallized annealed (RXA) cladding types, and provides reasonable creep strains in
+the LWR range of temperature and cladding hoop stresses that compare well to data. This model is
+described below.
+\\
+\\
+The steady state thermal and irradiation creep rates are given by
+
+\begin{equation}
+    \dot{\varepsilon}_{th} = A \frac{E}{T} \left( \sinh \frac{a_{i}\sigma_{eff}}{E}\right)^{n} \exp\left(\frac{-Q}{RT}\right)
+    \label{eq:steady_state_thermal_creep_rate}
+\end{equation}
+
+\begin{equation}
+    \label{eq:steady_state_irradiation_creep_rate}
+    \varepsilon = C_{0}  \phi^{C_{1}}  \sigma^{C_{2}}_{eff}  f\left(T\right)
+\end{equation}
+
+Where
+
+\ind{   $\dot{\varepsilon}_{th},\dot{\varepsilon}_{irr}  = $  thermal and irradiation strain rate, respectively \sinum{m/m-hr} }
+
+These rates are added together, so 
+
+\begin{equation}
+    \dot{\varepsilon}_{th,irr} = \dot{\varepsilon}_{th} + \dot{\varepsilon}_{irr}
+    \label{eq:steady_state_total_creep_rate}
+\end{equation}
+
+The saturated primary hoop strain is given by
+
+\begin{equation}
+    \varepsilon^{s}_{p} = 0.0216  \dot{\varepsilon}^{0.109}_{th+irr}\left(2-\tanh\left(35500 \varepsilon_{th+irr}\right)\right)^{-2.05} 
+    \label{eq:saturated_primary_hoop_strain}
+\end{equation}
+
+The total thermal strain is given by
+
+\begin{equation}
+    \varepsilon_{H}  = \varepsilon^{s}_{p} \left(1-\exp\left(-52\sqrt{\dot{\varepsilon}_{th+irr} t} \right)\right) + \dot{\varepsilon}_{th +irr} t
+    \label{eq:total_thermal_strain}
+\end{equation}
+
+In FAST, strain rate is used. Taking the derivative with respect to time of the expression above
+gives
+
+\begin{equation}
+    \dot{\varepsilon_{H}}  = \frac{52  \varepsilon^{s}_{p}  \dot{\varepsilon}^{\frac{1}{2}}_{th + irr}}{2  t^{\frac{1}{2}}} \exp\left(-52 \sqrt{\dot{\varepsilon}_{th+irr} t} \right) + \dot{\varepsilon}_{th+irr}
+    \label{eq:strain_rate}
+\end{equation}                
+
+Where,
+\ind{   $T             =$  Temperature       \sinum{K}                         }
+\ind{   $t             =$  Time              \sinum{hours}                     }
+\ind{   $\sigma_{eff}  =$  Effective stress  \sinum{MPa}                       }
+\ind{   $\phi          =$  Fast neutron flux \sinum{n/m^{2}-s}  }
+
+The first term in Equation~\ref{eq:strain_rate} represents the primary creep. It has been observed
+that following significant changes in stress or stress reversals, the primary creep is best related
+to the change in effective stress and the direction of the change in hoop stress
+(\cite{ref:Geelhood2013}).  In FAST, the first term in Equation~\ref{eq:strain_rate} is
+calculated based on the time since the last significant stress change ($> \SInum{5}{MPa}$) using
+the change in effective stress and in the direction of the change
+in hoop stress.
+\\
+\\
+Table~\ref{tab:parameters_creep_equation_sra_rxa} lists the parameters used in these equations for
+SRA and RXA cladding types. These parameters are those recommended by Limb\"{a}ck and Andersson
+(\cite{ref:Limback1996a}), with the exception of the ``$A$'' parameter and
+the ``$f(T)$'' parameter, that were modified by PNNL.
+
+\renewcommand{\captiontext}{Parameters for FAST-1.0 Creep Equation for SRA and RXA Cladding}
+\begin{longtable}[c]{D{1.0in} D{0.5in} A{3.5in} A{1.0in}}
+    \caption{\captiontext} \label{tab:parameters_creep_equation_sra_rxa}                                                    \\  \hline
+        \textbf{ Parameter}     & \textbf{Units}            &   \textbf{ Values for SRA}    &   \textbf{Values for RXA}     \\  \hline
+    \endfirsthead
+    \caption[]{\captiontext~(continued)}                                                                                    \\  \hline
+        \textbf{ Parameter}     & \textbf{Units}            &   \textbf{ Values for SRA}    &   \textbf{Values for RXA}     \\  \hline
+    \endhead
+        $A$                     &       \sinum{K/MPa-hr}     &        \num{1.08E9}                                                      &        \num{5.47E8}                       \\
+        $E$                     &       \sinum{MPA}          &        $1.149-59.9\multi T$                                              &                                           \\
+        $a_{i}$                 &       \sinum{1/MPa}        &       $650{1-0.56\left(1-\exp(\num{-1.4E-27}\Phi^{1.3})\right)}$         &                                           \\
+                                &                            &       $\Phi = $ fast neutron fluence \sinum{n/cm^{2}}                    &                                           \\    
+        $n$                     &       \sinum{unitless}     &       2.0                                                                &       3.5                                 \\
+        $Q$                     &       \sinum{kJ/mole}      &       201                                                                &                                           \\
+        $R$                     &       \sinum{kJ/mol-K}     &       \num{8.314E-3}                                                     &                                           \\
+        $C_{0}$                 &       \sinum{n/m^{2}-s}    &       \num{4.0985E-24}                                                   &       \num{1.87473E-24}                   \\
+                                &       \sinum{MPa^{-c2}}    &                                                                          &                                           \\         
+                                &                            &                                                                          &                                           \\    
+        $C_{1}$                 &       \sinum{unitless}     &       0.85                                                               &                                           \\
+        $C_{2}$                 &       \sinum{unitless}     &       1.0                                                                &                                           \\
+        $f(T)$                  &       \sinum{unitless}     &       0.7283 for $T< \SInum{570}{K}$                                     &       0.7994                              \\ 
+                                &                            &       $7.0237+0.0136T$ for $\SInum{570}{K}<T<\SInum{625}{K}$             &                                           \\
+                                &                            &       1.4763 for $T>\SInum{625}{K}$                                      &      $3.18562+\num{6.99132E-3}T$          \\
+                                &                            &                                                                          &       1.1840                              \\
+\end{longtable}
+
+The effective stress in the cladding is found using the principal stresses at the mid-wall radius
+using the thick wall formula as shown in
+Equations~\ref{eq:principle_stress_radial}-~\ref{eq:principle_stress_hoop}.
+
+\begin{equation}
+    \label{eq:principle_stress_radial}
+    \sigma_{r} = \frac{P_{i}r_{i}^{2}-P_{o}r_{o}^{2} + \frac {r_{i}^2r_{o}^2 \left(P_{o} - P_{i}\right)}{r^{2}}}{r_{o}^{2}- r_{i}^{2}}    
+\end{equation}
+
+\begin{equation}
+    \label{eq:principle_stress_tangential}
+    \sigma_{t} = \frac{P_{i}r_{i}^{2}-P_{o}r_{o}^{2} - \frac {r_{i}^2r_{o}^2 \left(P_{o} - P_{i}\right)}{r^{2}}}{r_{o}^{2}- r_{i}^{2}}    
+\end{equation}
+
+\begin{equation}
+    \label{eq:principle_stress_hoop}
+    \sigma_{l} = \frac{P_{i}r_{i}^{2}  - P_{o}r_{o}^{2} }{r_{o}^{2}- r_{i}^{2}}
+\end{equation}
+
+Where,
+\ind{   $P_{o}       =$  outer pressure      }
+\ind{   $r_{i}       =$  inner radius        }
+\ind{   $r_{o}       =$  outer radius        }
+\ind{   $r           =$  radius within tube  }
+\ind{   $\sigma_{r}  =$  radial stress       }
+\ind{   $\sigma_{t}  =$  tangential stress   }
+\ind{   $\sigma_{l}  =$  longitudinal stress }
+
+The effective stress, $\sigma_{eff}$, is then given by
+
+\begin{equation}
+    \label{eq:effective_stress}
+    \sigma_{eff} = \sqrt{\frac{1}{2}\left(\left(\sigma_{l}-\sigma_{t}\right)^{2} 
+    + \left(\sigma_{t}-\sigma_{r}\right)^{2} + \left(\sigma_{r}-\sigma_{l}\right)^{2} \right)}
+\end{equation}
+
+The correlations above are developed for SRA and RXA Zircaloy-4 and Zircaloy-2. For M5, the
+correlation for RXA Zircaloy is used. For ZIRLO and Optimized ZIRLO, the correlation for SRA
+Zircaloy reduced by a factor of 0.8 is used (\cite{ref:Sabol1994b}).
+\\
+\\
+A plot of the resulting creep strain is shown as a function of time and effective stress for
+representative flux and temperature values in Figure~\ref{fig:creep_strain_function_of_time}.
+
+\begin{figure}
+    \includegraphics[height=\figheight\textheight]{../media/SRA_Zircaloy_Creep_Strain}
+    \caption{Cladding Creep Strain as a Function of Time and Hoop Stress for \SInum{630}{\mDF} and Flux=\SInum{10E18}{n/m^{2}-s} for SRA Zircaloy}
+    \label{fig:creep_strain_function_of_time}
+\end{figure}
+
+\begin{figure}
+    \includegraphics[height=\figheight\textheight]{../media/RXA_Zircaloy_Creep_Strain}
+    \caption{Cladding Creep Strain as a Function of Time and Hoop Stress for \SInum{630}{\mDF} and Flux=\SInum{10E18}{n/m^{2}-s} for RXA Zircaloy}
+    \label{fig:creep_strain_function_of_time}
+\end{figure}
+
+The second additional correlation required is a relationship between the rate of permanent
+volumetric strain and the applied loads; that is,
+
+\begin{equation}
+    \label{eq:rate_perm_volume_strain_applied_loads}
+    \dot{V}^{c} = g\left( \sigma_{m}, T, t, V_{avail} \right)
+\end{equation}
+
+Where,
+\ind{   $\sigma_{m}  =$  $(\sigma_{1}+\sigma2+\sigma3)/3$ the mean stress         \sinum{MPa}   }
+\ind{   $T           =$  temperature                                              \sinum{K}     }
+\ind{   $t           =$  time                                                     \sinum{s}     }
+\ind{   $V_{avail }  =$  measure of maximum permanent volumetric change possible                }
+
+The permanent volumetric strain increment $dV_{c}$ is related to the creep strain increments by the
+equation
+
+\begin{equation}
+    \label{eq:delta_rate_perm_volume_strain_applied_loads}
+    dV^{c} = d\varepsilon_{1}^{c} +  d\varepsilon_{1}^{c}  + d\varepsilon_{1}^{c}  
+\end{equation}                 
+
+As previously noted, the FRACAS-I model is the default model available for analyzing the small
+deformation of the fuel and cladding. The model considers the fuel pellets to be essentially rigid
+and to deform due to thermal expansion, swelling, and densification only. Thus, in the rigid pellet
+model, the displacement of the fuel is calculated independently of the deformation of the cladding.
+This rigid pellet analysis is performed with the FRACAS-I subcode.
+
+\subsubsection{Rigid Pellet Cladding Deformation Model}\label{section:rigid-pellet-cladding-deformation-model}
+
+FRACAS-I consists of a cladding deformation model and a fuel deformation
+model. If the fuel-cladding gap is closed, the fuel deformation model
+will apply a driving force to the cladding deformation model. The
+cladding deformation model, however, never influences the fuel
+deformation model.
+\\
+\\
+The cladding deformation model in FRACAS-I is based on the following
+assumptions:
+
+\begin{itemize}
+    \item Incremental theory of plasticity.
+    \item Prandtl-Reuss flow rule.
+    \item Isotropic work-hardening.
+    \item Thick wall cladding (thick wall approximation formula is used to calculate stress at midwall).
+    \item If fuel and cladding are in contact, no axial slippage occurs at fuel cladding interface.
+    \item Bending strains and stresses in cladding are negligible.
+    \item Axisymmetric loading and deformation of cladding.
+\end{itemize}
+
+The fuel deformation model in FRACAS-I is based on the following
+assumptions:
+
+\begin{itemize}
+    \item Thermal expansion, swelling, and densification are the only sources for fuel deformation.
+    \item No resistance to expansion of fuel.
+    \item No creep deformation of fuel.
+    \item Isotropic fuel properties.
+\end{itemize}
+
+The cladding and fuel deformation models in FRACAS-I are described
+below.
+
+\subsubsection{Cladding Deformation Model}\label{section:cladding-deformation-model}
+
+The rigid pellet cladding deformation subcode (FRACAS-I) consists of four sets of models, each used
+independently.
+\\
+\\
+Deformation and stresses in the cladding in the open gap regime are computed using a model which
+considers a thick wall cylindrical shell with specified internal and external pressures and a
+prescribed uniform temperature.
+\\
+\\
+Calculations for the closed gap regime are made using a model which considers a cylindrical shell
+with prescribed external pressure and a prescribed radial displacement of the cladding inside
+surface. The prescribed displacement is obtained from the fuel expansion models (including swelling)
+described later in this section. Further, since no slippage is assumed when the fuel and cladding
+are in contact, the axial expansion of the fuel is transmitted directly to the cladding, and hence,
+the change in axial strain in the shell is also prescribed.
+\\
+\\
+The decision whether the fuel-cladding gap is open or closed is made by considering the relative
+movement of the cladding inside surface and the fuel outside surface. At the completion of the
+FRACAS-I analysis, either a new fuel-cladding gap size or a new fuel-cladding interfacial pressure
+and the elastic-plastic cladding stresses and strains are obtained.
+\\
+\\
+Two additional models are used to compute changes in yield stress with work-hardening, given a
+uniaxial stress-strain curve. This stress-strain curve is obtained from the updated MATPRO
+properties. The first model computes the effective total strain and new effective plastic strain,
+given a value of effective stress and the effective plastic strain at the end of the last loading
+increment. The second model computes the effective stress, given an increment of plastic strain and
+the effective plastic strain at the end of the last loading increment. Depending on the
+work-hardened value of yield stress, loading can be either elastic or plastic, and unloading is
+constrained to occur elastically.  (Isotropic work-hardening is assumed in these calculations.)
+These four sets of models are described below.
+\\
+\\
+The determination of whether or not the fuel is in contact with the cladding is made by comparing
+the radial displacement (delta change) of the fuel surface ($u_{r}^{fuel}$) with the radial
+displacement (delta change) that would occur in the cladding ($u_{r}^{clad}$) due to the prescribed
+external (coolant) pressure and the prescribed internal (fission and fill gas) pressure. The free
+radial displacement of the cladding is obtained using Equation~\ref{eq:total_strains_hooks_law}.
+The following expression is used to determine if fuel-cladding contact has occurred:
+
+\begin{equation}
+    \label{eq:fuel_clad_contact_criteria}
+    u_{r}^{fuel} \geq u_{r}^{clad} + \delta
+\end{equation}
+
+Where,
+\ind{   $\delta$  =  as-fabricated fuel-cladding gap size \sinum{m} }
+
+If Equation~\ref{eq:fuel_clad_contact_criteria} is satisfied, the fuel is in contact with the
+cladding. The loading history enters into this decision by virtue of the permanent plastic cladding
+strains which are applied to the as-fabricated geometry. These plastic strains, and total effective
+plastic strain, $\varepsilon^{P}$, are retained for use in subsequent calculations.
+\\
+\\
+If the fuel and cladding displacements are such that Equation~\ref{eq:fuel_clad_contact_criteria} is
+not satisfied, the fuel-cladding gap has not closed during the current step and the solution
+obtained by the open gap solution is appropriate.  The current value of the fuel-cladding gap size
+is then computed and is used in the temperature calculations. The plastic strain values may be
+changed in the solution if additional plastic straining has occurred.
+\\
+\\
+If Equation~\ref{eq:fuel_clad_contact_criteria} is satisfied, however, fuel and
+cladding contact has occurred during the current loading increment. At the
+contact interface, radial continuity requires that
+
+\begin{equation}
+    \label{eq:radial_continuity_requirement}
+    u_{r}^{cladl} = u_{r}^{fuel} -  \delta
+\end{equation}
+
+while in the axial direction the assumption is made that no slippage occurs between the fuel and the
+cladding. This state is referred to as ``lockup.''
+\\
+\\
+Note that only the additional strain which occurs in the fuel after lockup has occurred is
+transferred to the cladding. Thus, if $\varepsilon_{z,o}^{clad}$ is the axial strain in the cladding
+just prior to contact, and $\varepsilon_{z,o}^{fuel}$ is the corresponding axial strain in the fuel,
+then the no-slippage condition in the axial direction becomes
+
+\begin{equation}
+    \label{eq:no_slippage_condition_axial_direction}
+    \varepsilon^{clad}_{z} - \varepsilon^{clad}_{z,0} = \varepsilon^{fuel}_{z} - \varepsilon^{fuel}_{z,0}
+\end{equation}
+
+The values of the ``prestrains'', $\varepsilon_{z,o}^{fuel}$ and $\varepsilon_{z,o}^{clad}$, are set
+equal to the values of the strains that existed in the fuel and cladding at the time of
+fuel-cladding gap closure and are stored and used in the cladding sequence of calculations. The
+values are updated at the end of any load increment during which the fuel-cladding gap is closed.
+\\
+\\
+After $u_{r}^{clad}$ and $\varepsilon_{z}^{clad}$ have been computed, they are used in a calculation
+which considers a cylindrical shell with prescribed axial strain, external pressure, and prescribed
+radial displacement of the inside surface.  After the solution is obtained, a value of the
+fuel-cladding interfacial pressure is computed along with new plastic strains and stresses.
+\\
+\\
+The open gap modeling considers a cylindrical shell loaded by both internal and external pressures.
+Axisymmetric loading and deformation are assumed.  Loading is also restricted to being uniform in
+the axial direction, and no bending is considered. The geometry and coordinates are shown in
+Figure~\ref{fig:fuel_rod_geometry_and_coordinates}. The displacements of the midplane of the shell
+are $u$ and $w$ in the radial and axial directions, respectively.
+
+\begin{figure}
+    \includegraphics[height=\figheight\textheight]{../media/image45}
+    \caption{Fuel Rod Geometry and Coordinates}
+    \label{fig:fuel_rod_geometry_and_coordinates}
+\end{figure}
+
+For this case, the equilibrium equations are identically satisfied by the thick wall approximation
+below.
+
+\begin{equation}
+    \label{eq:thick_wall_equilibrium_stress_hoop}
+    \sigma_{\theta} = \frac{r_{i}P_{i} - r_{o}P_{o}}{t}
+\end{equation}
+
+\begin{equation}
+    \label{eq:thick_wall_equilibrium_stress_axial}
+    \sigma_{z} = \frac{r_{i}^{2}P_{i} - r_{o}^{2}P_{o}}{ r_{o}^{2} - r_{i}^{2}}
+\end{equation}
+
+Where,
+\ind{   $\sigma_{q}$   =    hoop stress                    \sinum{MPa}  }
+\ind{   $\sigma_{z}$   =    axial stress                   \sinum{MPa}  }
+\ind{   $r_{i}$        =    inside radius of cladding      \sinum{m}    }
+\ind{   $r_{o}$        =    outside radius of cladding     \sinum{m}    }
+\ind{   $P_{i}$        =    fuel rod internal gas pressure \sinum{MPa}  }
+\ind{   $P_{o}$        =    coolant pressure               \sinum{MPa}  }
+\ind{   $t$            =    cladding thickness             \sinum{m}    }
+
+For membrane shell theory, the strains are related to the midplane displacements by
+
+\begin{equation}
+    \label{eq:membrane_shell_theory_hoop}
+    \varepsilon_{\theta} = \frac{u}{\overline{r}}
+\end{equation}
+
+\begin{equation}
+    \label{eq:membrane_shell_theory_axial}
+    \varepsilon_{z} = \pdv{w}{z}
+\end{equation}
+
+Where,
+\ind{   $\overline{r}$ is the radius of the midplane.} 
+
+Strain across the thickness of the shell is allowed. In shell theory, since the radial stress can be
+neglected, and since the hoop stress, $\sigma_{q}$, and axial stress, $\sigma_{z}$, are uniform
+across the thickness when bending is not considered, the radial strain is due only to the Poisson
+effect and is uniform across the thickness. (Normally, radial strains are not considered in a shell
+theory, but plastic radial strains must be included when plastic deformations are considered.)
+\\
+\\
+The stress-strain relations are written in incremental form as
+
+\begin{equation}
+    \label{eq:strain_relationship_hoop}
+    \varepsilon_{\theta} = \frac{1}{E} \left(\sigma_{\theta} - \nu \sigma_{z}\right) + \varepsilon^{P}_{\theta} + d\varepsilon^{P}_{\theta} + \int_{T_{0}}^{T} \alpha_{\theta}dT
+\end{equation}
+
+\begin{equation}
+    \label{eq:strain_relationship_axial}
+    \varepsilon_{z} = \frac{1}{E} \left(\sigma_{z} - \nu \sigma_{\theta}\right) + \varepsilon^{P}_{z} + d\varepsilon^{P}_{z} + \int_{T_{0}}^{T} \alpha_{z}dT
+\end{equation}
+
+\begin{equation}
+    \label{eq:strain_relationship_radial}
+    \varepsilon_{r} = - \frac{\nu}{E} \left(\sigma_{\theta} - \nu \sigma_{z}\right) + \varepsilon^{P}_{r} + d\varepsilon^{P}_{r} + \int_{T_{0}}^{T} \alpha_{r}dT
+\end{equation}
+
+Where,
+\ind{   $t_{o}$   =  strain-free reference temperature \sinum{K}    }
+\ind{   $\alpha$  =  coefficient of thermal expansion         }
+\ind{   $t$       =  current average cladding temperature \sinum{K} }
+\ind{   $e$       =  modulus of elasticity                    }
+\ind{   $\nu$     =  poisson's ratio                          }
+
+The terms $\varepsilon_{\theta}^P$, $\varepsilon_{z}^P$, and $\varepsilon_{r}^P$ are the plastic
+strains at the end of the last load increment, and $d\varepsilon_{\theta}^P$, $d\varepsilon_{z}^P$,
+and $d\varepsilon_{r}^P$ are the additional plastic strain increments which occur due to the new
+load increment.
+\\
+\\
+The magnitude of the additional plastic strain increments is determined by the effective stress and
+the Prandtl-Reuss flow rule, expressed as
+
+\begin{equation}
+    \label{eq:prandtl_reuss_effective_stress}
+    \sigma_{e} = \frac{1}{\sqrt{2}} \left[ \left( \sigma_{\theta} - \sigma_{z} \right)^{2}   + \left(\sigma_{z} \right)^{2} +  \left(\sigma_{\theta} \right)^{2} \right]^{\frac{1}{2}}
+\end{equation}
+
+\begin{equation}
+    \label{eq:prandtl_reuss_dep_i}
+    d{\varepsilon}^{p}_{i} = \frac{3}{2} \frac{d\varepsilon^{P}}{\sigma_{e}}S_{i}\;\;\text{for}\;\; i = r, \theta, z
+\end{equation}
+
+\begin{equation}
+    \label{eq:prandtl_reuss_S_i}
+    S_{i} = \sigma_{i} - \frac{1}{3} \left(\sigma_{\theta} + \sigma_{z}\right)\;\;\text{for}\;\; i = r, \theta, z 
+\end{equation}
+
+The solution of the open gap case proceeds as follows. At the end of the last load increment the
+plastic strain components, $\varepsilon_{\theta}^P$, $\varepsilon_{z}^P$ and $\varepsilon_{r}^P$ are
+known.  Also the total effective plastic strain, $\varepsilon^{P}$, is
+known.
+\\
+\\
+The loading is now incremented with the prescribed values of $P_{i}$, $P_{o}$, and $T$. The new
+stresses can be determined from Equation~\ref{eq:thick_wall_equilibrium_stress_hoop} and
+Equation~\ref{eq:thick_wall_equilibrium_stress_axial}, and a new value of effective stress is
+obtained from Equation~\ref{eq:prandtl_reuss_effective_stress}.
+\\
+\\
+The increment of effective plastic strain, $d\varepsilon^{P}$, which results from the current
+increment of loading, can now be determined from the uniaxial stress-strain curve at the new value
+of $\sigma_{e}$, as shown in Figure~\ref{fig:calculation_effective_stress_from_dep}. (The new
+elastic loading curve depends on the value of $\varepsilon^{P}_{old}$.)
+
+\begin{figure}
+    \includegraphics[height=\figheight\textheight]{../media/image63}
+    \caption{Calculation of Effective Stress $\sigma_{e}$ from $d\varepsilon_{P}$}
+    \label{fig:calculation_effective_stress_from_dep}
+\end{figure}
+
+Once $d\varepsilon^{P}$ is determined, the individual plastic strain
+components are found from Equation~\ref{eq:prandtl_reuss_dep_i}, and the
+total strain components are obtained from Equations~\ref{eq:strain_relationship_hoop}
+through~\ref{eq:strain_relationship_radial}.
+\\
+\\
+The displacement of the inside surface of the shell must be determined so that a new fuel-cladding
+gap width can be computed. The radial displacement of the inside surface is given by
+
+\begin{equation}
+    \label{eq:shell_inside_surface_radial_displacement}
+    u\left(r_{i}\right) = \overline{r} \varepsilon{\theta}  - \frac{t}{2} \varepsilon{r}
+\end{equation}
+
+where the first term is the radial displacement of the midplane (from
+Equation~\ref{eq:membrane_shell_theory_hoop}) and $\varepsilon_{r}$ is the uniform strain across the
+cladding thickness, $t$.
+\\
+\\
+The cladding thickness is computed by the equation
+
+\begin{equation}
+    \label{eq:shell_cladding_thickness}
+    t = \left(1 + \varepsilon_{r}\right)t_{o}
+\end{equation}
+
+Where
+\ind{   $t_{o}$  =  as-fabricated, unstressed thickness   }
+
+The final step performed is to add the plastic strain increments to the previous plastic strain
+values; that is,
+
+\begin{subequations}
+    
+    \begin{equation}
+        \left(\varepsilon^{P}_{\theta}\right)_{new}  = \left(\varepsilon^{P}_{\theta}\right)_{old} + d\varepsilon^{P}_{\theta} 
+    \end{equation}
+
+    \begin{equation}
+            \left(\varepsilon^{P}_{z}\right)_{new}       = \left(\varepsilon^{P}_{z}\right)_{old} + d\varepsilon^{P}_{z}           
+    \end{equation}
+
+    \begin{equation}
+            \left(\varepsilon^{P}_{r}\right)_{new}       = \left(\varepsilon^{P}_{r}\right)_{old} + d\varepsilon^{P}_{r}           
+    \end{equation}
+    
+    \begin{equation}
+            \left(\varepsilon^{P}\right)_{new}           = \left(\varepsilon^{P}\right)_{old} + d\varepsilon^{P}_{r}               
+    \end{equation}
+    \label{eq:plastic_strains_old_plus_delta}
+\end{subequations}
+
+%\begin{equation}
+%    \label{eq:plastic_strains_old_plus_delta}
+%        \begin{aligned}
+%            \left(\varepsilon^{P}_{\theta}\right)_{new}  = \left(\varepsilon^{P}_{\theta}\right)_{old} + d\varepsilon^{P}_{\theta} \\
+%            \left(\varepsilon^{P}_{z}\right)_{new}       = \left(\varepsilon^{P}_{z}\right)_{old} + d\varepsilon^{P}_{z}           \\
+%            \left(\varepsilon^{P}_{r}\right)_{new}       = \left(\varepsilon^{P}_{r}\right)_{old} + d\varepsilon^{P}_{r}           \\
+%            \left(\varepsilon^{P}\right)_{new}           = \left(\varepsilon^{P}\right)_{old} + d\varepsilon^{P}_{r}               \\
+%        \end{aligned}
+%\end{equation}
+These values are used for the next load increment.
+\\
+\\
+Thus, all the stresses and strains can be computed directly, since in this case the stresses are
+determinate. In the case of the fuel-driven cladding displacement, the stresses depend on the
+displacement, and such a straightforward solution is not possible.
+\\
+\\
+The closed gap modeling considers the problem of a cylindrical shell for which the radial
+displacement of the inside surface and axial strain are prescribed. Here the stresses cannot be
+computed directly since the pressure at the inside surface (the fuel-cladding interfacial pressure)
+must be determined as part of the solution.
+%\\
+%\\
+As in the open gap modeling, the displacement at the inside surface is
+given by
+
+\begin{equation}
+    \label{eq:inside_surface_displacement_closed_gap}
+    u\left(r_{i}\right) = u - \frac{t}{2} \varepsilon_{r}
+\end{equation}
+
+Where,
+\ind{   $u$  =  radial displacement of the midplane   }
+
+From Equation~\ref{eq:membrane_shell_theory_hoop}, $u = r\varepsilon_{\theta}$ and
+
+\begin{equation}
+    \label{eq:radial_displacement_r_i}
+    u\left(r_{i}\right) = \overline{r}\varepsilon_{\theta} - \frac{t}{2} \varepsilon_{r}
+\end{equation}
+
+Thus, prescribing the displacement of the inside surface of the shell is equivalent to a
+constraining relation between $\varepsilon_{\theta}$and $\varepsilon_{i}$. As before, Hooke's law is
+taken in the form
+
+\begin{equation}
+    \label{eq:hooks_law_shell_contrained_hoop}
+    \varepsilon_{\theta} = \frac{1}{E} \left( \sigma{\theta}-\nu\sigma_{z} \right)+\varepsilon_{z}^P+d\varepsilon_{z}^P+\int\limits_{T_0}^T \alpha_{z}dT
+\end{equation}
+
+\begin{equation}
+    \label{eq:hooks_law_shell_contrained_axial}
+    \varepsilon_{z} = \frac{1}{E} \left( \sigma{z}-\nu\sigma_{\theta} \right)+\varepsilon_{z}^P+d\varepsilon_{z}^P+\int\limits_{T_0}^T \alpha_{z}dT
+\end{equation}
+
+\begin{equation}
+    \label{eq:hooks_law_shell_contrained_radial}
+    \varepsilon_{r} = -\frac{\nu}{E} \left( \sigma_{\theta}-\sigma_{z} \right)+\varepsilon_{r}^P+d\varepsilon_{r}^P+\int\limits_{T_0}^T \alpha_{r}dT
+\end{equation}
+
+Use of Equations~\ref{eq:radial_displacement_r_i} and~\ref{eq:hooks_law_shell_contrained_radial} in
+Equation~\ref{eq:hooks_law_shell_contrained_hoop} results in a relation between the stresses
+$\sigma_{\theta}$ and $\sigma_{z}$, and the prescribed displacement $u(r_{i}$):
+
+\begin{equation}
+    \label{eq:relationship_hoop_axial_stress_and_displacement_ur}
+    \begin{aligned}
+        \frac{u(r_i)}{\bar{r}}+\frac{1}{2} \frac{1}{2 \bar{r}} & \left[ \varepsilon_{r}^P+d\varepsilon_{r}^P+\int\limits_{T_0}^T \alpha dT \right]-\left[ \varepsilon_{\theta}^P+d\varepsilon_{\theta}^P+\int\limits_{T_0}^T \alpha dT \right] = \\
+        & \frac{1}{E} \left[ \left( 1+ \frac{\nu t}{2 \bar{r}} \right) \sigma_{\theta}+\nu \left( \frac{t}{2 \bar{r}}-1 \right) \sigma_{z} \right]
+    \end{aligned}
+\end{equation}
+
+Equations~\ref{eq:hooks_law_shell_contrained_axial}
+and~\ref{eq:relationship_hoop_axial_stress_and_displacement_ur} are now a pair of simultaneous
+algebraic equations for the stresses $\sigma_{\theta}$~and $\sigma_{z}$, which may be written as
+
+\begin{equation}
+    \label{eq:simultaneous_stress_hoop_axial}
+    \mqty[ A_{11}&A_{12}\\A_{21}&A_{22}]\mqty[ \sigma_{\theta} \\ \sigma_{\theta}]=\mqty[ B_{1} \\ B_{2}]
+\end{equation}
+
+Where,
+\ind{   $A_{11} $  = $ 1+ \frac{\nu t}{2 \bar{r}} $                }
+\ind{   $A_{12} $  = $ \nu \left( \frac{t}{2 \bar{r}} -1 \right) $ }
+\ind{   $A_{21} $  = $ -\nu $                                      }
+\ind{   $A_{22} $  = $ 1 $                                         }
+\ind{   $B_{1}  $  = $  \left( E \frac{u(r_i)}{\bar{r}} +\frac{Et}{4 \bar{r}} \left[ \varepsilon_{r}^P+d\varepsilon_{r}^P+\int\limits_{T_0}^T \alpha dT \right] \right)-E \left[ \varepsilon_{\theta}^P+d\varepsilon_{\theta}^P+\int\limits_{T_0}^T \alpha dT \right] $}
+\ind{   $B_{2}  $  = $ E \left( \varepsilon_z- E\varepsilon_{z}^P+d\varepsilon_{z}^P+\int\limits_{T_0}^T \alpha dT \right)$ }
+
+Then the stresses can be written explicitly as
+
+\begin{equation}
+    \label{eq:hoop_stress_matrix_soln}
+    \sigma_{\theta}=\frac{B_{1}A_{22}-B_{2}A_{12}}{A_{11}A_{22}-A_{12}AA_{21}}
+\end{equation}
+
+\begin{equation}
+    \label{eq:axial_stress_matrix_soln}
+    \sigma_{z}=\frac{B_{2}A_{11}-B_{1}A_{12}}{A_{11}A_{22}-A_{12}AA_{21}}
+\end{equation}
+
+These equations relate the stresses to $u(r_{i})$ and $\varepsilon_{z}$, which are prescribed, and
+to \detheta, \dez, and \der, which are to be determined. The remaining equations which must be
+satisfied are
+
+\begin{equation}
+    \label{eq:effective_hoop_stress}
+    \sigma_e=\frac{1}{\sqrt{2}} \left[ (\sigma_{\theta}-\sigma_{z})^2+(\sigma_{z})^2+(\sigma_{\theta})^2 \right] ^{\frac{1}{2}}
+\end{equation}
+
+\begin{equation}
+    \label{eq:plastic_strain_increment_dep}
+    d \varepsilon^P=\frac{\sqrt{2}}{3} \left[ (d \varepsilon_{r}^{P}-d \varepsilon_{\theta}^{P})^2+(d \varepsilon_{\theta}^{P}-d \varepsilon_{z}^{P})^2+(d \varepsilon_{z}^{P}-d \varepsilon_{r}^{P})^2 \right] ^{\frac{1}{2}}
+\end{equation}
+
+and the Prandtl-Reuss flow equations (defined in Equation~\ref{eq:prandtl_reuss_dep_i}):
+
+\begin{equation}
+    \label{eq:delta_effective_strain_hoop}
+    d \varepsilon_{\theta}^{P}= \frac{3}{2} \frac{d \varepsilon^P}{\sigma_e} \left[ \sigma_{\theta} - \frac{1}{3}(\sigma_{\theta}+\sigma_{z} )\right]
+\end{equation}
+
+\begin{equation}
+    \label{eq:delta_effective_strain_axial}
+    d \varepsilon_{z}^{P}= \frac{3}{2} \frac{d \varepsilon^P}{\sigma_e} \left[ \sigma_{z} - \frac{1}{3}(\sigma_{\theta}+\sigma_{z} )\right]
+\end{equation}
+
+\begin{equation}
+    \label{eq:delta_effective_strain_radial}
+    d \varepsilon_{r}^{P}= -d \varepsilon_{\theta}^{P}-d \varepsilon_{z}^{P}
+\end{equation}
+\\
+\\
+The effective stress, $\sigma_{e}$, and the plastic strain increment, $d\varepsilon^{P}$, must, of
+course, be related by the uniaxial stress-strain law. Equations~\ref{eq:hoop_stress_matrix_soln}
+through~\ref{eq:delta_effective_strain_radial} must be simultaneously satisfied for each loading
+increment.
+\\
+\\
+As discussed in Section~\ref{section:general-theory-and-method-of-solution}, a straightforward
+numerical solution to these equations can be obtained using the method of successive elastic
+solutions. By this method, arbitrary values are initially assumed for the increments of plastic
+strain, and Equations~\ref{eq:hoop_stress_matrix_soln}
+through~\ref{eq:delta_effective_strain_radial} are used to obtain improved estimates of the plastic
+strain components.  The following steps are performed for each increment of load:
+\\
+\\
+Values of \detheta, \dez , \der and are assumed. Then, $d\varepsilon^{P}$ is computed from
+Equation~\ref{eq:plastic_strain_increment_dep} and the effective stress is obtained from the
+stress-strain curve at the value of $d\varepsilon^{P}$.
+\\
+\\
+From Hooke's law, still using the assumed plastic strain increments and the prescribed values of
+$u(r_{i}$) and $\varepsilon_{z}$, values for the stresses can be obtained from
+Equations~\ref{eq:hoop_stress_matrix_soln} and~\ref{eq:axial_stress_matrix_soln}.
+\\
+\\
+New values for \detheta, \dez, \der and are now computed from the Prandtl-Reuss relations,
+
+\begin{equation}
+    \label{eq:new_value_dep_i_prandtl_reuss_relation}
+    d \varepsilon_i^P=\frac{3}{2} \frac{d \varepsilon^P}{\sigma_e} \left[ \sigma_i- \frac{1}{3} \left( \sigma_{\theta}+\sigma_z \right) \right] \text{ for i= r, }\theta \text{, z}
+\end{equation}
+
+The old and new values of \detheta, \dez , \der and are compared and the process continued until
+convergence is obtained.
+ \\
+ \\
+Once convergence has been obtained, the fuel-cladding interfacial pressure is computed from the
+following thick wall approximation equation.
+
+\begin{equation}
+    \label{eq:thick_wall_approximation_interfacial_pressure}
+    P_{int}=\frac{t\sigma_{\theta}+r_{o}P_{o}}{r_i}
+\end{equation}
+\\
+\\
+When steps 1 through 5 have been accomplished, the solution is complete, provided that the
+fuel-cladding interface pressure is not less than the local gas pressure.
+\\
+\\
+However, due to unequal amounts of plastic straining in the hoop and axial directions upon
+unloading, the fuel-cladding interfacial pressure as obtained in step 5 is often less than the gas
+pressure even though the fuel-cladding gap has not opened. When this situation occurs, the
+frictional ``locking'' (which is assumed to constrain the cladding axial deformation to equal the
+fuel axial deformation) no longer exists. The axial strain and stress adjust themselves so that the
+fuel-cladding interfacial pressure equals the gas pressure, at which point the axial strain is again
+``locked.'' Thus, upon further unloading, the axial strain and the hoop and axial stresses
+continually readjust themselves to maintain the fuel-cladding interfacial pressure equal to the gas
+pressure until the fuel-cladding gap opens. Since the unloading occurs elastically, a solution for
+this portion of the fuel-cladding interaction problem can be obtained directly as discussed below.
+\\
+\\
+Since the external pressure and the fuel-cladding interfacial pressure
+are known, the hoop stress is obtained from Equation~\ref{eq:thick_wall_approximation_interfacial_pressure} as
+
+\begin{equation}
+    \label{eq:hoop_stress_calc}
+    \sigma_{\theta} = \frac{r_{i}P_{int}-r_{o}P_{o}}{t}
+\end{equation}
+
+From Equation~\ref{eq:radial_displacement_r_i}, the following expression
+can be written:
+
+\begin{equation}
+    \label{eq:hoop_strain_calc}
+    \varepsilon_{\theta} = \frac{u^{fuel}_{r} - \delta + \frac{t}{2}\varepsilon}{\overline{r}}
+\end{equation}
+
+Substitution of $\varepsilon_{\theta}$~and $\varepsilon_{r}$, as given by
+Equations~\ref{eq:hooks_law_shell_contrained_hoop} and~\ref{eq:hooks_law_shell_contrained_radial},
+into Equation~\ref{eq:hoop_strain_calc} results in an explicit equation for
+$\sigma_{z}$:
+
+\begin{equation} 
+    \nu r_i \sigma_z=\left(r+\nu \frac{t}{2} \right) \sigma_{\theta}+rE \left( \int \alpha dT+d \varepsilon_{\theta}^P \right)-\frac{t}{2}E \left( \int \alpha dT+d \varepsilon_r^P \right)-Eu(r_i)
+\end{equation}
+
+in which $\sigma_{\theta}$ is known from Equation~\ref{eq:hoop_stress_calc}.  With $\sigma_{z}$ and
+$\sigma_{\theta}$~known, the strains may be computed from Hooke's law,
+Equations~\ref{eq:hooks_law_shell_contrained_hoop}
+through~\ref{eq:hooks_law_shell_contrained_radial}.  This set of equations is automatically invoked
+whenever $P_{int}$ is computed to be less than the local gas pressure.
+
+As in the open gap modeling, the last step is to set the plastic strain components and total
+effective strain equal to their new values by adding in the computed increments \de{i} and \de{}.
+\\
+\\
+The stress-strain modeling is used to relate stress and plastic strain, taking into consideration
+the direction of loading and the previous plastic deformation. A typical stress-strain curve is
+shown in Figure~\ref{fig:idealized_stress_strain_behavior}.  This curve presents the results of a
+uniaxial stress-strain experiment and may be interpreted beyond initial yield as the focus of
+work-hardened yield stresses. The equation of the curve is provided by the updated MATPRO properties
+at each temperature given in
+Section~\ref{section:updated-matpro-cladding-mechanical-properties-models}.
+\\
+\\
+To use this information, the usual idealization of the mechanical behavior of metals is made. Thus,
+linear elastic behavior is assumed until a sharply defined yield stress is reached, after which
+plastic (irrecoverable) deformation occurs. Unloading from a stress state beyond the initial yield
+stress, $\sigma_{y}^{o}$ , is assumed to occur along a straight line having the elastic modulus for
+its slope. When the (uniaxial) stress is removed completely, a residual plastic strain remains, and
+this completely determines the subsequent yield stress. That is, when the specimen is loaded again,
+loading will occur along line BA in Figure~\ref{fig:idealized_stress_strain_behavior} and no
+additional deformation will occur until point A is again reached. Point A is the subsequent yield
+stress. If $\sigma =f(\varepsilon)$ is the equation of the plastic portion of the stress-strain
+curve (YAC), then for a given value of plastic strain, the subsequent yield stress is found by
+simultaneously solving the pair of equations.
+
+\begin{figure}
+    \includegraphics[height=\figheight\textheight]{../media/image94}
+    \caption{Idealized Stress Strain Behavior}
+    \label{fig:idealized_stress_strain_behavior}
+\end{figure}
+
+\begin{equation} 
+    \label{eq:sigma_f_e}
+    \sigma=f\left(\varepsilon\right)
+\end{equation} 
+
+\begin{equation} 
+    \label{eq:sigma_E_e}
+    \sigma=E(\varepsilon-\varepsilon^P)
+\end{equation}
+
+Which may be written as
+
+\begin{equation}
+    \label{eq:sigma_rewritten}
+    \sigma=f \left( \frac{\sigma}{E}+\varepsilon^P \right)
+\end{equation}
+
+This nonlinear equation may be solved efficiently by using an iteration
+scheme:
+
+\begin{equation} 
+    \label{eq:initial_stress_iterate}
+    \sigma^{m+1}=f \left( \frac{\sigma^m}{E}+\varepsilon^P \right) \text{ for $m$ = 0, 1,2...}
+\end{equation} 
+
+The initial iterate, $\sigma^{m}$, is arbitrary, and without loss of generality, is taken as 34.5
+MPa. For any monotonically, increasing stress-plastic strain relation, the iteration scheme in
+Equation~\ref{eq:initial_stress_iterate} will converge uniformly and absolutely.
+\\
+\\
+The computations of the stress-strain modeling are described below. The first computes strain as a
+function of plastic strain, temperature, and stress. The second computes stress as a function of
+plastic strain, temperature, and plastic strain increments.
+\\
+\\
+Values of plastic strain, $\varepsilon^{P}$, temperature, and stress are used as follows:
+
+\begin{enumerate}
+\item
+  For a given temperature, $\sigma= f(\varepsilon)$ is obtained from the updated
+  MATPRO properties given in Section~\ref{section:updated-matpro-cladding-mechanical-properties-models}.
+\item
+  The yield stress $\sigma_{y}$ for given $\varepsilon^{P}$ is obtained from Equation~\ref{eq:initial_stress_iterate}.
+\item
+  For a given value of stress, $\sigma$,
+    \begin{itemize}
+        \item if $\sigma \leq \sigma_{y}$
+            \begin{equation} 
+                \begin{aligned}
+                    \varepsilon           & = \frac{\sigma}{E} + \varepsilon^{P} \\
+                    \varepsilon_{P}^{new} & = \varepsilon_{old}^{P}
+                \end{aligned}
+            \end{equation} 
+        \item if $\sigma > \sigma_{y}$
+            \begin{equation}
+                \begin{aligned}
+                    \varepsilon           & = f(\sigma)                      \\
+                    \varepsilon_{new}^{P} & = \varepsilon - \frac{\sigma}{E} \\
+                    d\varepsilon^{P}      & = \varepsilon_{new}^{P} - \varepsilon_{old}^{P}
+                \end{aligned}
+            \end{equation}
+    \end{itemize}
+\end{enumerate}
+
+Where $E$ is computed using the correlation in the material
+properties handbook (Luscher and Geelhood 2014).
+
+Values of plastic strain, $\varepsilon^{P}$, temperature, and
+plastic strain increment, $d\varepsilon^{P}$, are used as
+follows:
+\begin{enumerate}
+    \item For a given temperature, $\sigma = f(\varepsilon)$ is obtained from the updated MATPRO
+        properties given in Section~\ref{section:updated-matpro-cladding-mechanical-properties-models}.
+    \item The yield stress $\sigma_{y}$ for given $\varepsilon^{P}$ is obtained from
+        Equation~\ref{eq:initial_stress_iterate}.
+    \item Given $d\varepsilon^{P}$ (see Figure~\ref{fig:computing_stress}).
+\end{enumerate}
+
+\begin{equation} 
+    \varepsilon^{P}_{new} = \varepsilon^{P}_{old} + d\varepsilon^{P} 
+\end{equation} 
+
+\begin{figure}
+    \includegraphics[height=\figheight\textheight]{../media/image101}
+    \caption{Computing Stress}
+    \label{fig:computing_stress}
+\end{figure}
+
+Since $d\varepsilon^{P} > 0$, the new value of stress and strain must lie on the plastic portion of
+the stress-strain curve $\sigma = f(\varepsilon) $. So, $\sigma$ and $\varepsilon$ are obtained by
+performing a simultaneous solution, as before.
+
+\subsubsection{Updated MATPRO Cladding Mechanical Properties Models}\label{section:updated-matpro-cladding-mechanical-properties-models}
+
+The mechanical properties of fuel rod Zircaloy cladding are known to change with irradiation because
+of damage induced from the fast neutron fluence. The changes are similar to cold-working the
+material because dislocation tangles are created that tend to both strengthen and harden the
+cladding while decreasing the ductility. In addition to the fast fluence effects, the presence of
+excess hydrogen in the Zircaloy, in the form of hydrides, may also affect the mechanical properties.
+\\
+\\
+Three MATPRO models have been modified to account for the high fast
+neutron fluence levels, temperature, and strain rate. Those models are
+a) the strength coefficient in CKMN, b) the strain hardening exponent in
+CKMN, and c) the strain rate exponent in CKMN.
+
+\subsubsection{Strength Coefficient, $K$}\label{section:strength-coefficient-k}
+
+The strength coefficient, $K$, has been modified from MATPRO and is a function of temperature,
+fast neutron fluence, cold work, and alloy composition. The strength coefficient has not been found
+to be a function of hydrogen concentration. The fluence dependency, $K(\Phi)$, has been modified
+from MATPRO to better fit the high burnup data. The models for the strength coefficients of
+Zircaloy-2 and Zircaloy-4 are given below.
+
+\begin{equation}
+    \label{eq:strength_coefficient_Zirc2_4}
+    K= \frac{K(T)\cdot (1+K(CW)+K(\Phi))}{K(Zry)}
+\end{equation}
+
+Where,
+
+\begin{equation}
+    \label{eq:stength_coefficient_Zirc2_4_K_T}
+    K(T) = 
+    \begin{cases}
+            \num{1.17628E9}+\num{4.54859E5}T-\num{3.28185E3}T^{2}                           & T<\SInum{750}{K}                       \\
+            \num{2.522488E6}\exp\left( \frac{\num{2.850027E6}}{T^2} \right)                  & \SInum{750}{K}<T<\SInum{1090}{K}  \\
+            \num{1.841376039E8}-\num{1.434544E5}T                                           & \SInum{1090}{K}<T<\SInum{1255}{K} \\
+            \num{4.330E7}-\num{6.685E4}T+\num{3.7579E1}T^2 - 7.33 \times 10^{-3}T^3         & \SInum{1255}{K}<T<\SInum{2100}{K}
+    \end{cases}
+\end{equation}
+
+\begin{equation}
+    \label{eq:stength_coefficient_Zirc2_4_K_CW}
+    K(CW) = 0.546 CW
+\end{equation}
+
+\begin{equation}
+    \label{eq:stength_coefficient_Zirc2_4_K_phi}
+    K(\Phi) = 
+    \begin{cases}
+        (0.1464+1.464 \times 10^{-25} \phi)f(CW,T) & \Phi< \SInum{0.1E25}{n/m^2}                         \\
+        2.928 \times 10^{-26} \phi                 & \SInum{0.1E25}{n/m^2}< \Phi< \SInum{2E25}{n/m^2} \\
+        0.53236+2.6618 \times 10^{-27} \phi        & \SInum{2E25}{n/m^2}< \Phi<\SInum{12E25}{n/m^2}
+    \end{cases}
+\end{equation}
+
+\begin{equation}
+    \label{eq:stength_coefficient_Zirc2_4_f_CW_T}
+    f(CW,T)=2.25\exp(-20  CW)  min \left[ 1, \exp \left( \frac{T-550}{10} \right) \right] +1
+\end{equation}
+
+Where,
+\ind{   $K(Zry) $  =  1.305 for Zircaloy-2                                                   }
+\ind{   $K(Zry) $  =  1 for Zircaloy-4                                                       }
+\ind{   $T $       =  temperature          \sinum{K}                                               }
+\ind{   $CW $      =  cold work            \sinum{unitless-ratio-of-areas} (valid from 0 to 0.75)  }
+\ind{   $\Phi $    =  fast neutron fluence \sinum{n/m^2} (E \textgreater{} \SInum{1}{MeV})  }
+
+The effective cold work and fast neutron fluence used to calculate the strength coefficient, $K$,
+can be reduced by annealing if the time and/or temperature are high enough. FAST uses the MATPRO
+model, CANEAL, to calculate the effective cold work and fast neutron fluence at each time step using
+the following equations.
+
+\begin{equation}
+    CW_i=CW_{i-1}\exp \left[-1.504 \left(1.504(1+\num{2.2E-25} \phi+{i-1} \right) (t) \exp \left( \frac{-\num{2.33E18}}{T^6} \right) \right]
+\end{equation}
+
+\begin{equation}
+    \phi_i= \frac{\num{1E20}}{\num{2.49E-6}(t) \exp \left( \frac{-\num{5.35E23}}{T^8} \right)+\frac{10^{20}}{\phi_{i-1}}}
+\end{equation}
+
+Where,
+        \ind    {$CW_{i-1}$, and $CW_{i}$ = the effective cold work for strength coefficient at the start and end of the time step, respectively \sinum{unitless-ratio-of-areas}  }
+        \ind{   $\phi_{I }$, and $\phi_{i-1}$      =     effective fast neutron fluence for strength coefficient at the start and end of the time step, respectively \sinum{n/m^{2}} }
+        \ind{   $t$                                      =     time step size                                                                    \sinum{s}                        }
+        \ind{   $T$                                      =     cladding temperature                                                              \sinum{K}                        }
+
+
+\subsubsection{Strain-Hardening Exponent, $n$}\label{section:strain-hardening-exponent-n}
+
+The strain-hardening exponent, $n$, has been modified from MATPRO to better fit the high burnup data
+and is a function of temperature, fast neutron fluence, and alloy composition. The strain hardening
+exponent has not been found to be a function of hydrogen concentration.  The models for the strain
+hardening exponents of Zircaloy-2 and Zircaloy-4 are given below.
+
+\begin{equation}
+    \label{eq:strain_hardening_n}
+    n = \frac{n(T) n(\Phi )}{n(Zry)}
+\end{equation}
+
+Where,
+
+\begin{equation}
+    n(T) = 
+    \begin{cases}
+        0.11405                                                                                         & T<\SInum{419.4}{K}            \\
+        -\num{9.490E-2}+\num{1.165E-3}T-\num{1.992E-6} T^2 +\num{9.588E-10} T^3 & \SInum{419.4}{K}<T<\SInum{1099.0772}{K} \\
+        -0.22655119+\num{2.5E-4}T                                                                 & \SInum{1099.0772}{K}<T<\SInum{1600}{K}  \\
+        0.17344880                                                                                      & T>\SInum{1600}{K}
+    \end{cases}
+\end{equation}
+
+\begin{equation}
+    n(\Phi) = 
+    \begin{cases}
+            1.321+\num{0.48E-25} \phi                   & \Phi<\SInum{0.1E25}{n/m^2}\\
+            1.369+\num{0.096E-25} \phi                  & \SInum{0.1E25}{n/m^2}< \Phi< \SInum{2E25}{n/m^2}\\
+            1.5435+\num{0.008727E-25} \phi              & \SInum{2E25}{n/m^2}< \Phi<\SInum{7.5E25}{n/m^2}\\
+            1.608953                                    & \Phi>\SInum{7.5E25}{n/m^2}
+    \end{cases}
+\end{equation}
+
+Where,
+\ind{   $n(Zry)$  =  1.0 for Zircaloy-4                                                    }
+\ind{   $n(Zry)$  =  1.6 for Zircaloy-2                                                    }
+\ind{   $T$       =  temperature          \sinum{K}                                              }
+\ind{   $\Phi$    =  fast neutron fluence \sinum{n/m^{2}} (E \SInum{1}{MeV}) }
+
+The effective fast neutron fluence used to calculate the strain-hardening exponent, n, can be
+reduced by annealing if the time or temperature, or both, are high enough. FAST uses the MATPRO
+model, CANEAL, to calculate the effective fast neutron fluence at each time step using the following
+equation.
+
+Where,
+\ind{   $\phi_{i}$, and $\phi_{i-1}$       =     effective fast neutron fluence for strain hardening exponent at the start and end of the time step, respectively  \sinum{n/m^{2}} }
+\ind{   $t$                                      =     time step size                                                                             \sinum{s}                       }
+\ind{   $T$                                      =     cladding temperature                                                                       \sinum{K}                      }
+
+\subsubsection{Strain Rate Exponent}\label{section:strain-rate-exponent}
+
+The strain rate exponent, $m$, has been modified from MATPRO to better fit the high burnup data and
+is given by a function of temperature only as described in the equation below.
+
+\begin{equation}
+    \label{eq:strain_rate_exponent_Zirc}
+    m =
+    \begin{cases}
+
+        0.015                           & T<\SInum{750}{K}      \\
+        \num{7.458E-4}T-0.544338        & \SInum{750}{K}<T<\SInum{800}{K} \\
+        \num{3.24124E-4}T-0.20701       & T>\SInum{800}{K}
+
+    \end{cases}
+\end{equation}
+
+Where,
+\ind{   $m$   =  strain rate exponent }
+\ind{   $T$   =  temperature \sinum{K}      }
+
+
+The impact of the strain rate exponent on yield stress is to increase the yield strength with
+increasing strain rate, but the effect is not large. For example, increasing the strain rate from
+\SInum{1E-4}{1/s} to \SInum{1.0}{1/s} will increase the yield strength by about 15\percent.
+\\
+\\
+\paragraph{Assembled Model}
+
+Tensile strength, yield strength, and strain are calculated using the same relationships in MATPRO's
+CMLIMT subroutine with slight modifications. The true ultimate strength is calculated using
+
+\begin{equation}
+    \label{eq:true_ultimate_strength}
+    \sigma = K\left(\frac{\dot{\varepsilon}}{\num{1E-3}}\right)^{m}\varepsilon^{n}_{p+e}
+\end{equation}
+
+
+Where,
+\ind{    $\sigma$                          =  true ultimate strength \sinum{MPa}                            }
+\ind{    $K$                               =  strength coefficient \sinum{MPa}                              }
+\ind{    $\dot{\varepsilon}$               =  strain rate \sinum{unitless}                                  }
+\ind{    $m$                               =  strain rate sensitivity constant from MATPRO \sinum{unitless} }
+\ind{    $\varepsilon\textsubscript{p+e}$  =  true strain at maximum load \sinum{unitless}                  }
+\ind{    $n$                               =  strain hardening exponent \sinum{unitless}                    }
+
+This is a change in the original MATPRO model in that the true strain at maximum load in the
+original model was set equal to the strain hardening exponent. This change was made to better fit
+the ultimate tensile strength data.
+\\
+\\
+The CMLIMT subroutine equations predicting true yield strength and true strain at yield remain
+unchanged.
+\\
+\\
+This model is applicable over the following ranges with an uncertainty (standard deviation) on yield
+and tensile strength of approximately 17\percent relative. 
+
+\begin{itemize}
+    \item   cladding temperature: 560 to \SInum{700}{K}         
+    \item    oxide corrosion thickness: 0 to \SInum{100}{\mu m}         
+    \item    excess hydrogen level: 0 to \SInum{650}{ppm}         
+    \item    strain rate: \num{1E-4} to \SInum{1E-5}{1/s}         
+    \item    fast neutron fluence: 0 to \SInum{12E25}{n/m^2}         
+    \item    Zircaloy: cold work and stress relieved         
+\end{itemize}
+
+A plot of predicted vs. measured yield stress is shown in
+Figure~\ref{fig:predicted_vs_measured_yield_stress_PNNL_database}.  Further data comparisons are
+shown in \cite{ref:Geelhood2008a}.
+
+\begin{figure}
+    \includegraphics[height=\figheight\textheight]{../media/Zircaloy_yield_stress} 
+    \caption{Predicted vs. Measured Yield Stress from the PNNL Database ($\SInum{293}{K} \leq T \leq \SInum{755}{K}$, $0 \leq \Phi \leq  \SInum{14E25}{n/m^2}$, $0 \leq H_{ex} \leq \SInum{850}{ppm}$)}
+    \label{fig:predicted_vs_measured_yield_stress_PNNL_database}
+\end{figure}
+
+\subsubsection{Rigid Pellet Fuel Deformation in FRACAS-I}\label{section:rigid-pellet-fuel-deformation-in-fracas-i}
+
+This section describes the analytical models used to compute fuel deformation in FRACAS-I. Models
+are available to calculate length change and fuel radial displacement. Relocation is also considered
+in FRACAS-I and is also discussed in this section. The effect of relocation is included in the
+thermal response; however, no hard contact between the fuel and cladding (and therefore no
+mechanical interaction) is allowed until the other fuel expansion components (swelling and thermal
+expansion) recover 50\percent of the original relocated pellet radius.  Therefore, the rigid pellet
+for mechanical analyses, and that also controls contact conductance, includes 50\percent of the
+original relocated pellet radius as well as the other pellet expansion components.
+\\
+\\
+The assumptions made with respect to fuel deformation in FRACAS-I are that no pellet deformation is
+induced by fuel-cladding contact stress or thermal stress and that free-ring thermal expansion
+applies. Each individual fuel ring is assumed to expand without restraint from any other ring, and
+the total expansion is the sum of the individual expansions.
+%
+\subsubsection{Radial Deformation}\label{section:radial-deformation}
+
+Radial deformation of the pellet due to thermal expansion, irradiation swelling, and densification
+is calculated with a free-ring expansion model. The governing equation for this model is
+
+\begin{equation}
+    \label{eq:pellet_radial_deformation_model}
+    R_{H} = \sum_{i = 1}^{N} \Delta r_{i} \left[1 + \alpha_{T_{i}} \left(T_{i} - T_{ref} \right) + \varepsilon_{i}^{s} + \varepsilon_{i}^{d}\right]
+\end{equation}
+
+Where,
+\ind{   $R_{H }$                   =   hot-pellet radius                                               \sinum{m}        }
+\ind{   $\alpha_{T_{i}}$           =   coefficient of thermal expansion of the i-th radial temperature \sinum{1/K}      }
+\ind{   $T_{i }$                   =   average temperature of i-th radial ring                         \sinum{K}        }
+\ind{   $T_{ref }$                 =   reference temperature                                           \sinum{K}        }
+\ind{   $r_{i }$                   =   width of \iteration{i} radial ring                                       \sinum{m}        }
+\ind{   $N$                        =   number of annular rings                                                    }
+\ind{   $\varepsilon^{s}_{i}$      =   swelling strain                                                 (positive) }
+\ind{   $\varepsilon^{s}_{d}$      =   densification strain                                            (negative) }
+
+The fuel densification and solid fuel swelling models are briefly discussed. The densification
+asymptotically approaches the (input) ultimate density change, typically over a local (node-average)
+burnup of approximately \SInum{5}{GWd/MTU}. Solid fuel swelling is considered only as the athermal
+swelling associated with solid fission product accumulation. It is linear with local (node-average)
+burnup, and starts following a burnup of \SInum{6}{GWd/MTU} (delayed for swelling into as-fabricated
+porosity).  It then accumulates per time step at a rate equal to
+0\SInum{.062}{volume\percent/GWd/MTU} up to \SInum{80}{GWd/MTU} and 0.086 volume \percent per
+\sinum{GWd/MTU} beyond \SInum{80}{GWd/MTU} \cite{ref:Luscher2014b}.
+\\
+\\
+A gasesous swelling model is included in FAST. The model is based on data from Mogensen
+(\cite{ref:Mogensen1985b}) and was developed after ramp test results suggested gaseous
+swelling may influence permanent cladding hoop strain in high burnup rods. The linear strain is
+given as a function of temperature over the ranges given in the following equations. These models
+are phased in between 40 and \SInum{50}{GWd/MTU} by applying a factor that varies linearly between 0
+and 1 at 40 and \SInum{50}{GWd/MTU}, respectively.
+
+\begin{equation}
+    \frac{\Delta l}{l} = 
+    \begin{cases}
+        \num{4.55E-5}T-\num{4.7E-2}     & \SInum{960}{\mDC} < T < \SInum{1370}{\mDC} \\
+        -\num{4.05E-5}+\num{7.40E-2}    & \SInum{1370}{\mDC} < T < \SInum{1832}{\mDC}
+    \end{cases}
+\end{equation}
+
+\subsubsection{Axial Deformation}\label{section:axial-deformation}
+
+Axial deformation of the total fuel stack takes into account the thermal, densification, and
+swelling strains at each axial node. The calculation proceeds differently for flat-ended versus
+dished-pellets as described below.
+\\
+\\
+For flat-ended pellets, the volume-averaged ring axial deformation is calculated for each axial
+node, and these are summed to find the total stack deformation assuming isotropic behavior. The ring
+deformations account for thermal, densification, and swelling strains specific to each ring.
+\\
+\\
+For dished pellets, the axial deformation of the ``maximum ring'' (the ring with the maximum deformed
+length) per node is found, and these ``maximum ring'' deformations are summed to find the total
+deformation.  Typically, the ``maximum ring'' is the innermost ring on the dish shoulder because the
+deformation of the rings within the dish does not fill the dish volume, as illustrated in
+Figure~\ref{fig:interpellet_void_volume}.
+
+\begin{figure}
+    \includegraphics[height=\figheight\textheight]{../media/image9}
+    \caption{Interpellet Void Volume}
+    \label{fig:interpellet_void_volume}
+\end{figure}
+
+\subsubsection*{Fuel Relocation}\label{section:fuel-relocation}
+
+Fuel pellet center temperatures measured at beginning of life (BOL) in instrumented test rods have
+repeatedly been found to be lower than values predicted by thermal performance computer programs
+when the predicted fuel-cladding gap in operation is calculated based only on fuel and cladding
+thermal expansion (\cite{ref:Lanning1982}). It has long been concluded, based on
+microscopic examination of fuel cross sections (\cite{ref:Galbraith1973};
+\cite{ref:Cunningham1984}), that fuel pellet cracking promotes an outward
+relocation of the pellet fragments that causes additional gap closure. This process begins at BOL
+and quickly reaches equilibrium. \cite{ref:Oguma1983} characterized this approach to
+equilibrium based on his analysis of BOL test rod elongation data from Halden instrumented test
+assemblies.
+\\
+\\
+The fuel pellet cracking that promotes relocation is predominantly radial; however, some
+circumferential components to these crack patterns exist, and these components could alter the fuel
+thermal conductivity.  Thus, cracking and relocation will to some degree increase the thermal
+resistance in the pellet while reducing the thermal resistance of the pellet-cladding gap by
+reducing its effective size. The relocation model implicitly includes any crack effects on heat
+transfer because the model is based on fuel centerline temperature data.
+\\
+\\
+The best estimate pellet relocation model developed for GT2R2 (\cite{ref:Cunningham1984}), has been
+altered for use in FAST in conjunction with the FRACAS-I mechanical model.  This model is based on
+the model developed for FRAPCON-3.5. The gap closure at beginning of life was fit to the first ramp
+to power data. Due to the excellent centerline temperature predictions throughout life, the
+FRAPCON-3.4 pellet relocation model beyond \SInum{5}{GWd/MTU} was retained.  Data from IFA-677.1
+which contained very stable pellets that exhibited little to no densification was available showing
+stack elongation (which is proportional to fuel temperature) as a function of power for ramps to
+power at 0.1, 0.6, 4, and \SInum{5}{GWd/MTU} (\cite{ref:Therache2005b}).  These data
+demonstrated that the increase in relocation from 0 to \SInum{5}{GWd/MTU} appears to follow a
+logarithmic trend. Therefore, a logarithmic function was adopted to model the relocation between 0
+and \SInum{5}{GWd/MTU}.
+
+{\color{red}There are two possible citations for Th\`{e}ache 2005 and I am not sure which one is
+correct}
+
+The gap closure due to relocation as a fraction of the as-fabricated pellet-cladding gap is given by
+
+\begin{equation}
+    \label{eq:gap_closure_function_of_asfab_gap}
+    \frac{\Delta G}{G} = 
+    \begin{cases}
+        0.055 & \text{burnup} < 0.0937 \sinum{GWd/MTU}  \\
+        0.055 + min\left(reloc, reloc  \left(0.5795 + 2447  \ln\left(\text{burnup}\right)\right)\right)  & \text{burnup} > 0.0937 \sinum{GWD/MTU}
+    \end{cases}
+\end{equation}
+
+Where,
+ \ind{   $\Delta G/G$   =  fraction of as fabricated gap closure due to pellet relocation (fraction) }
+ \ind{   $P$           =  local power, \sinum{kW/ft}                                                        }
+ \ind{   burnup        =  local burnup, \sinum{GWd/MTU}                                                     }
+
+and,
+
+\begin{equation}
+    \label{eq:relocation_as_function_of_power}
+    reloc = 
+    \begin{cases}
+        0.345                      &   P > 20           \\
+        0.45+\left(P-20\right)/200 & 20 \leq P \leq 40  \\
+        0.445                      & P > 40
+    \end{cases}
+\end{equation}
+
+A plot of this model as a function of burnup and LHGR is shown in 
+Figure~\ref{fig:relocation_model}. Also shown for reference is the relocation model from FRAPCON-3.4.
+\\
+\\
+\begin{figure}
+    \includegraphics[height=\figheight\textheight]{../media/UO2_relocation_model}
+    \caption{Power and Burnup Dependence of the FAST-1.0 Relocation Model with the FRAPCON-3.4 Model Shown for Reference}
+    \label{fig:relocation_model}
+\end{figure}
+
+The fuel-cladding gap size used in the thermal and internal pressure calculations includes the fuel
+relocation, while the fuel-cladding gap size used in the mechanical calculations allows for
+50\percent of the relocation to be recovered before cladding stress/strain is driven by the fuel.

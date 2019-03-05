@@ -1,0 +1,39 @@
+\chapter*{Executive Summary}
+\addcontentsline{toc}{chapter}{Executive Summary}
+The nuclear fuel performance code, FAST, has been co-developed by the U.S.  Nuclear Regulatory
+Commission and Pacific Northwest National Laboratory as a confirmatory tool designed to calculate
+the steady-state and transient fuel behavior at high burnup (up to rod-average burnup of
+\SInum{62}{GWD/MTU}, depending on application). The code is an evolution of the former PNNL
+developed codes FRAPCON and FRAPTRAN, which were used to calculate the steady-state and transient
+response of LWR fuel rods, respectively. This document is Volume 1 of a three-volume series that
+describes the current version of FAST. Volume 1 contains: 
+\begin{enumerate}
+    \item Code limitations and structure 
+    \item Fuel performance model summaries; and 
+    \item Code input instructions and features to aid the user. 
+\end{enumerate}
+
+Volume 2 (\colorbox{yellow}{Geelhood et al, 2018}) provides a code assessment based on comparisons
+of code predictions to integral performance data up to high burnup. Volume 3
+(\colorbox{yellow}{Gellhood et al, 2018}) provides a description and assessment of the material
+models used by FAST's material library, MatLib.
+\\
+\\
+The FAST code is designed to perform steady-state and transient fuel rod calculations. The code uses
+a single-channel coolant enthalpy rise model.  The code uses a finite difference heat conduction
+model, which uses a variable mesh spacing in the fuel material to accommodate for the power peaking
+at the pellet edge that occurs in high-burnup fuel.
+\\
+\\
+FAST has been validated for boiling-water reactors, pressurized reactors, and heavy-water reactors.
+The fuels that have been validated are uranium dioxide (\element{U}{}\element{O}{2}), mixed oxide
+fuel ((\element{U}{},\element{Pu}{})\element{O}{2}), urania-gadolinia
+(\UO-\element{Gd}{2}\element{O}{3}), and \UO with zirconium diboride (\element{ZrB}{2}) coatings.
+The cladding types that have been validated are Zircaloy-2, Zircaloy-4, M5, ZIRLO, and Optimized
+ZIRLO.  FAST-1.0 can predict fuel and cladding temperature, rod internal pressure, fission gas
+release, cladding axial and hoop strain, and cladding corrosion and hydriding. The code uses an
+updated version of the MATPRO material properties package (\cite{ref:Hagrman1981a})
+as described in a separate material properties handbook (\cite{ref:Luscher2014b}),
+that has been updated for high-burnup conditions and advanced cladding alloys.
+\newpage\null
+{}

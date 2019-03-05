@@ -1,0 +1,411 @@
+\documentclass[12pt]{article}         
+%========================================================================%
+%latex packages                                                          %
+%========================================================================%
+\usepackage[margin=1in]{geometry}  %setting the paper margin
+\usepackage{physics}                 %used for the equations
+\usepackage{array}                   %used for setting up the tables
+\newcolumntype{L}{>{\centering\arraybackslash}m{3.5cm}}  %used for the table entries
+\newcolumntype{N}{>{\centering\arraybackslash}m{4.5cm}}  %used for the table entries
+\usepackage{float}                   %places the figures and tables
+\usepackage{hyperref}                %highlights references
+\usepackage{lastpage}                %labels the last page
+\usepackage{graphicx}                %making the figures
+\usepackage{color}                   %full color palette
+\usepackage{titleps}                 %making the title page
+%\usepackage{draftwatermark}          %makes the draft mark
+\usepackage{longtable}               %makes the table
+\usepackage{fancyhdr}                %setting the paper style
+\usepackage{siunitx}                 %used for the units
+\usepackage{sectsty}                 %used for the section style
+\usepackage{blindtext}               %used to handle the blind text
+\usepackage{amsmath}                 %math package
+\usepackage{ifxetex}                 %used for the MD5SUM
+\usepackage[flushleft]{threeparttable} %making the footnotes in tables
+\usepackage{threeparttablex}         %second part for the table
+\usepackage{pdftexcmds}              %used to perform pdf commnads
+\usepackage{lscape}                  %used to make the page landscape
+%========================================================================%
+%page style setup                                                        %
+%========================================================================%
+\pagestyle{fancy}                    %setting the page style
+\renewcommand{\headrulewidth}{0.6pt} %the line at the top of the page
+\renewcommand{\footrulewidth}{0.6pt} %the line at the bottom of the page
+\fancyhead[L]{\LaTeX 101}            %left header
+%\fancyhead[R]{Emilio Torres}         %right header
+\fancyhead[R]{\today}                %right header
+\fancyfoot[C]{}                      %clearing the center footer
+\fancyfoot[R]{Page \thepage{} of \pageref{LastPage}}%right footer
+\fancyfoot[L]{\rightmark}            %setting the left footer to the section name 
+\setcounter{secnumdepth}{0}          %clearing the number of the section
+%========================================================================%
+%hyperlink setup                                                         %
+%========================================================================%
+\definecolor{gblue}{RGB}{055, 055, 190}
+\hypersetup{%color all links blue
+                plainpages=false,
+                pdftitle={RAMJET Analysis},
+                pdfauthor={Emilio Torres},
+                colorlinks=true,
+                citecolor=gblue,
+                filecolor=gblue,
+                linkcolor=gblue,
+                menucolor=gblue,
+                runcolor=gblue,
+                urlcolor=gblue,
+}
+%========================================================================%
+%Setting up the water mark                                               %
+%========================================================================%
+%\SetWatermarkLightness{0.75}    %make watermark reasonably dark
+%\SetWatermarkScale{4}           %make watermark bigger
+%\SetWatermarkText{DRAFT}        %make watermark text
+%========================================================================%
+%User defined functions                                                  %
+%========================================================================%
+\newcommand{\ML}{MATLAB 2017}                   %used to write MATLAB 2017
+\newcommand{\PY}{Python 3.5}                    %used to write MATLAB 2017
+\newcommand{\Cp}{$\text{c}_\text{p}$}           %used to write specific heat
+\newcommand{\Tt}[1]{$\text{T}_{\text{t}#1}$}    %used to write the T_t
+\newcommand{\Pt}[1]{$\text{P}_{\text{t}#1}$}    %used to write the P_t
+\newcommand{\Ps}[1]{$\text{P}_{#1}$}            %used to write the P_s
+%========================================================================%
+%Begin document                                                          %
+%========================================================================%
+\begin{document}    %this is how you start every document
+Equations on Page 2-61
+\begin{equation}
+\frac{{\Delta}G}{G}=0.055
+\end{equation}
+
+\begin{equation}
+\frac{{\Delta}G}{G}=0.055+min\left(reloc,reloc\left(0.5795+0.2447 \cdot ln\left( burnup \right)\right)\right)
+\end{equation}
+
+\begin{equation}
+\frac{{\Delta}G}{G}= \mqty{{0.345} \\{0.345+(P-20)/200}\\{0.445}} \text{ where: } \mqty{{P<20} \\{20\leq P \leq 40}\\{P > 40}}
+\end{equation}
+
+Equations on Page 2-59
+\begin{equation}
+\frac{{\Delta}l}{l}=4.55 \times 10^{-5} T-4.37 \times 10^{-2} \text{ where: } \left( 960^{\circ}C<T<1370^{\circ}C \right)
+\end{equation}
+
+\begin{equation}
+\frac{{\Delta}l}{l}=-4.05 \times 10^{-5} T+7.40 \times 10^{-2}\text{ where: } \left( 1370^{\circ}C<T<1832^{\circ}C \right)
+\end{equation}
+
+Equation on Page 2-58
+\begin{equation}
+R_{H}=\sum\limits_{i=1}^N \Delta r_i \left[ 1+\alpha_{T_i} \left( T_i - T_ref \right) + \varepsilon_{i}^s + \varepsilon_{i}^d \right]
+\end{equation}
+
+Equation on Page 2-56
+\begin{equation}
+\sigma = K \left( \frac{\dot{\varepsilon}}{10^{-3}} \right)^m \varepsilon_{p+e}^n
+\end{equation}
+Equations on Page 2-55
+\begin{align}
+m &=0.015 & T<750K\\
+m &=7.458 \times 10^{-4}T-0.544338 & 750K<T<800K\\
+m &=3.24124 \times 10^{-4}T-0.20701 & T>800K
+\end{align}
+Equations on Page 2-54 and 2-55
+\begin{equation}
+n= \frac{n(T)\cdot n(\Phi )}{n(Zry)}
+\end{equation}
+\begin{align}
+n(T)&=0.11405 & T<419.4K\\
+n(T)&=-9.490 \times 10^{-2}+1.165 \times 10^{-3}T-1.992 \times 10^{-6} T^2 +9.588 \times 10^{-10} T^3 & 419.4K<T<1099.0772K\\
+n(T)&=-0.22655119+2.5 \times 10^{-4}T & 1099.0772K<T<1600K\\
+n(T)&=0.17344880 & T>1600K
+\end{align}
+\begin{align}
+n(\Phi )&=1.321+0.48 \times 10^{-25} \phi & \Phi<0.1 \times 10^{25} n/m^2\\
+n(\Phi )&=1.369+0.096 \times 10^{-25} \phi & 0.1 \times 10^{25} n/m^2< \Phi<2 \times 10^{25} n/m^2\\
+n(\Phi )&=1.5435+0.008727 \times 10^{-25} \phi & 2 \times 10^{25} n/m^2< \Phi<7.5 \times 10^{25} n/m^2\\
+n(\Phi )&=1.608953 & \Phi>7.5 \times 10^{25} n/m^2
+\end{align}
+\begin{align}
+n(Zry)&=1 & for Zircaloy-4 \\
+n(Zry)&=1.6 & for Zircaloy-2
+\end{align}
+\begin{equation}
+\phi_i=\frac{10^{20}}{2.49 \times 10^{-6} \cdot t\cdot exp \left( \frac{-5.35 \times 10^{23}}{T^8} \right)+ \frac{10^{20}}{\phi_{i-1}}}
+\end{equation}
+Equations on Page 2-52 and 2-53
+
+\begin{equation}
+K= \frac{K(T)\cdot (1+K(CW)+K(\Phi))}{K(Zry)}
+\end{equation}
+\begin{align}
+K(T)&=1.17628 \times 10^{9}+4.54859 \times 10^{5}T-3.28185 \times 10^{3}T^{2} & T<750\\
+K(T)&=2.522488 \times 10^{6}exp \left( \frac{2.850027 \times 10^6}{T^2} \right) & 750K<T<1090K\\
+K(T)&=1.841376039 \times 10^8-1.434544 \times 10^{5}T & 1090K<T<1255K\\
+K(T)&=4.330 \times 10^7-6.685 \times 10^{4}T++3.7579 \times 10^{1}T^2 - 7.33 \times 10^{-3}T^3  & 1255<T<2100K
+\end{align}
+\begin{equation}
+K(CW) = 0.546 \cdot CW
+\end{equation}
+\begin{align}
+K(\Phi )&=(0.1464+1.464 \times 10^{-25} \phi)f(CW,T) & \Phi<0.1 \times 10^{25} n/m^2\\
+K(\Phi )&=2.928 \times 10^{-26} \phi & 0.1 \times 10^{25} n/m^2< \Phi<2 \times 10^{25} n/m^2\\
+K(\Phi )&=0.53236+2.6618 \times 10^{-27} \phi & 2 \times 10^{25} n/m^2< \Phi<12 \times 10^{25} n/m^2
+\end{align}
+\begin{equation}
+f(CW,T)=2.25exp(-20 \cdot CW) \cdot min \left[ 1, exp \left( \frac{T-550}{10} \right) \right] +1
+\end{equation}
+\begin{align}
+K(Zry)&=1 & for Zircaloy-4 \\
+K(Zry)&=1.305 & for Zircaloy-2
+\end{align}
+\begin{equation}
+CW_i=CW_{i-1}exp \left[-1.504 \left(1.504(1+2.2 \times 10^{-25} \phi+{i-1} \right) (t) exp \left( \frac{-2.33 \times 10^{18}}{T^6} \right) \right]
+\end{equation}
+\begin{equation}
+\phi_i= \frac{10^{20}}{2.49 \times 10^{-6}(t) exp \left( \frac{-5.35 \times 10^{23}}{T^8} \right)+\frac{10^{20}}{\phi_{i-1}}}
+\end{equation}
+Equations on Page 2-48
+
+\begin{equation}
+\text{if } \sigma \leq \sigma_y
+\end{equation}
+\begin{align}
+\varepsilon &=\frac{\sigma}{E}+\varepsilon^{P} \\
+\varepsilon_{new}^{P} &=\varepsilon_{old}^{P} \\
+\varepsilon &= f(\sigma)
+\end{align}
+\begin{equation}
+\text{if } \sigma > \sigma_y
+\end{equation}
+\begin{align}
+\varepsilon_{new}^{P} &=\varepsilon - \frac{\sigma}{E} \\
+d \varepsilon^{P} &=\varepsilon_{new}^{P}- \varepsilon_{old}^{P}
+\end{align}
+\begin{equation}
+\varepsilon_{new}^{P}=\varepsilon_{old}^{P}+d \varepsilon^{P}
+\end{equation}
+Equations on Page 2-49
+
+\begin{equation}
+\sigma=f(\varepsilon)
+\end{equation}
+\begin{equation}
+\sigma=E(\varepsilon-\varepsilon^P)
+\end{equation}
+\begin{equation}
+\sigma=f \left( \frac{\sigma}{E}+\varepsilon^P \right)
+\end{equation}
+\begin{equation}
+\sigma=f \left( \frac{\sigma^m}{E}+\varepsilon^P \right) \text{ m = 0, 1,2...}
+\end{equation}
+Equation on page 2-48
+\begin{equation}
+\nu r_i \sigma_z=\left(r+\nu \frac{t}{2} \right) \sigma_{\theta}+rE \left( \int \alpha dT+d \varepsilon_{\theta}^P \right)-\frac{t}{2}E \left( \int \alpha dT+d \varepsilon_r^P \right)-Eu(r_i)
+\end{equation}
+Equations on Page 2-47
+\begin{equation}
+d \varepsilon_i^P=\frac{3}{2} \frac{d \varepsilon^P}{\sigma_e} \left[ \sigma_i- \frac{1}{3} \left( \sigma_{\theta}+\sigma_z \right) \right] \text{ for i= r, }\theta \text{, z}
+\end{equation}
+New values for $ d \varepsilon_{\theta}^P $,$ d \varepsilon_{z}^P $, and $ d \varepsilon_{r}^P $ are compared and the process continued until convergence is obtained. 
+\begin{equation}
+P_{int}=\frac{t\sigma_{\theta}+r_{o}P_{o}}{r_i}
+\end{equation}
+Equations on Page 4-46
+\begin{equation}
+\sigma_{\theta}=\frac{B_{1}A_{22}-B_{2}A_{12}}{A_{11}A_{22}-A_{12}AA_{21}}
+\end{equation}
+\begin{equation}
+\sigma_{z}=\frac{B_{2}A_{11}-B_{1}A_{12}}{A_{11}A_{22}-A_{12}AA_{21}}
+\end{equation}
+These equations relate the stresses to $ u(r_i)$ and $\varepsilon_z $, which are prescribed, and to $ d \varepsilon_{\theta}^P $,$ d \varepsilon_{z}^P $, and $ d \varepsilon_{r}^P $, which are to be determined. The remaining equations which must be satisfied are
+\begin{equation}
+\sigma_e=\frac{1}{\sqrt{2}} \left[ (\sigma_{\theta}-\sigma_{z})^2+(\sigma_{z})^2+(\sigma_{\theta})^2 \right] ^{\frac{1}{2}}
+\end{equation}
+\begin{equation}
+d \varepsilon^P=\frac{\sqrt{2}}{3} \left[ (d \varepsilon_{r}^{P}-d \varepsilon_{\theta}^{P})^2+(d \varepsilon_{\theta}^{P}-d \varepsilon_{z}^{P})^2+(d \varepsilon_{z}^{P}-d \varepsilon_{r}^{P})^2 \right] ^{\frac{1}{2}}
+\end{equation}
+\begin{equation}
+d \varepsilon_{\theta}^{P}= \frac{3}{2} \frac{d \varepsilon^P}{\sigma_e} \left[ \sigma_{\theta} - \frac{1}{3}(\sigma_{\theta}+\sigma_{z} )\right]
+\end{equation}
+\begin{equation}
+d \varepsilon_{z}^{P}= \frac{3}{2} \frac{d \varepsilon^P}{\sigma_e} \left[ \sigma_{z} - \frac{1}{3}(\sigma_{\theta}+\sigma_{z} )\right]
+\end{equation}
+\begin{equation}
+d \varepsilon_{r}^{P}= -d \varepsilon_{\theta}^{P}-d \varepsilon_{z}^{P}
+\end{equation}
+The effective stress, $\sigma_{\theta}$, and the plastic strain increment, $d\varepsilon^P$, must, of course, be related by the unusual stress-strain law. 
+
+Values of $d \varepsilon_{\theta}^P$, $d \varepsilon_{z}^P$ , and $d \varepsilon_{r}^P$are assumed. Then, $d \varepsilon^P$ is computed from Equation (2.125) and the effective stress is obtained from the stress-strain curve at the value of $d \varepsilon^P$.
+
+Equations on Page 2-45
+\begin{equation}
+\varepsilon_{z} = \frac{1}{E} \left( \sigma{z}-\nu\sigma_{\theta} \right)+\varepsilon_{z}^P+d\varepsilon_{z}^P+\int\limits_{T_0}^T \alpha_{z}dT
+\end{equation}
+\begin{equation}
+\varepsilon_{r} = -\frac{\nu}{E} \left( \sigma_{\theta}-\sigma_{z} \right)+\varepsilon_{r}^P+d\varepsilon_{r}^P+\int\limits_{T_0}^T \alpha_{r}dT
+\end{equation}
+\begin{equation}
+\frac{u(r_i)}{\bar{r}}+\frac{1}{2} \frac{1}{2 \bar{r}} \left[ \varepsilon_{r}^P+d\varepsilon_{r}^P+\int\limits_{T_0}^T \alpha dT \right]-\left[ \varepsilon_{\theta}^P+d\varepsilon_{\theta}^P+\int\limits_{T_0}^T \alpha dT \right] =
+\end{equation}
+\begin{equation}
+\frac{1}{E} \left[ \left( 1+ \frac{\nu t}{2 \bar{r}} \right) \sigma_{\theta}+\nu \left( \frac{t}{2 \bar{r}}-1 \right) \sigma_{z} \right]
+\end{equation}
+\begin{equation}
+\mqty[ A_{11}&A_{12}\\A_{21}&A_{22}]\mqty[ \sigma_{\theta} \\ \sigma_{\theta}]=\mqty[ B_{1} \\ B_{2}]
+\end{equation}
+\begin{align}
+A_{11} &= 1+ \frac{\nu t}{2 \bar{r}} \\
+A_{12} &= \nu \left( \frac{t}{2 \bar{r}} -1 \right) \\
+A_{21} &= -\nu \\
+A_{22} &= 1 \\
+B_{1} &=  \left( E \frac{u(r_i)}{\bar{r}} +\frac{Et}{4 \bar{r}} \left[ \varepsilon_{r}^P+d\varepsilon_{r}^P+\int\limits_{T_0}^T \alpha dT \right] \right)-E \left[ \varepsilon_{\theta}^P+d\varepsilon_{\theta}^P+\int\limits_{T_0}^T \alpha dT \right] \\
+B_{2} &= E \left( \varepsilon_z- E\varepsilon_{z}^P+d\varepsilon_{z}^P+\int\limits_{T_0}^T \alpha dT \right)
+\end{align}
+Page 2-44 Equations
+\begin{align}
+\left( \varepsilon_{\theta}^P \right)_{new} &= \left( \varepsilon_{\theta}^P \right)_{old}+d\varepsilon_{\theta}^P\\
+\left( \varepsilon_{z}^P \right)_{new} &= \left( \varepsilon_{z}^P \right)_{old}+d\varepsilon_{z}^P\\
+\left( \varepsilon_{r}^P \right)_{new} &= \left( \varepsilon_{r}^P \right)_{old}+d\varepsilon_{r}^P\\
+\left( \varepsilon^P \right)_{new} &= \left( \varepsilon^P \right)_{old}+d\varepsilon^P
+\end{align}
+\begin{equation}
+u(r_i)=u-\frac{t}{2} \varepsilon_r
+\end{equation}
+\begin{equation}
+u(r_i)= \bar{r} \varepsilon_{\theta}-\frac{t}{2} \varepsilon_r
+\end{equation}
+\begin{equation}
+\varepsilon_{\theta}=\frac{1}{E} \left( \sigma_{\theta}-\nu\sigma_{z}\right)+\varepsilon_{\theta}^P+d\varepsilon_{\theta}^P+\int\limits_{T_0}^T \alpha_{\theta} dT
+\end{equation}
+Page 2-43 equations
+\begin{equation}
+u(r_i)= \bar{r} \varepsilon_{\theta}-\frac{t}{2} \varepsilon_r
+\end{equation}
+\begin{equation}
+t = \left( 1 + \varepsilon_r \right) t_0
+\end{equation}
+Page 2-42 equations \\
+The terms  $\varepsilon_{\theta}^P$, $\varepsilon_{z}^P$ , and $\varepsilon_{z}^P$  are the plastic strains at the end of the last load increment, and $d\varepsilon_{\theta}^P$, $d\varepsilon_{z}^P$, and $d\varepsilon_{r}^P$ are the additional plastic strain increments which occur due to the new load increment.
+\begin{equation}
+\sigma_e=\frac{1}{\sqrt{2}} \left[ (\sigma_{\theta}-\sigma_{z})^2+(\sigma_{z})^2+(\sigma_{\theta})^2 \right] ^{\frac{1}{2}}
+\end{equation}
+\begin{equation}
+d\varepsilon_i^P = \frac{3}{2} \frac{d\varepsilon^p}{\sigma_e}S_i \text{ for i = r, }\theta\text{, z}
+\end{equation}
+\begin{equation}
+S_i=\sigma_i-\frac{1}{3}(\sigma_{\theta}+\sigma_{z}) \text{ for i = r, }\theta\text{, z}
+\end{equation}
+The solution of the open gap case proceeds as follows. At the end of the last load increment the plastic strain components, $\varepsilon_{\theta}^P$, $\varepsilon_{z}^P$, and $\varepsilon_{r}^P$  are known. Also the total effective plastic strain, $\varepsilon^P$, is known. \\
+\\
+The loading is now incremented with the prescribed values of $P_i$, $P_o$, and $T$. The new stresses can be determined from Equations (2.102) and (2.103), and a new value of effective stress is obtained from Equation (2.109). \\
+\\
+The increment of effective plastic strain, $\varepsilon^P$, which results from the current increment of loading, can now be determined from the uni axial stress-strain curve at the new value of $\sigma_{theta}$, as shown in Figure 2.11. (The new elastic loading curve depends on the value of $\varepsilon_{old}^P$.)\\
+\\
+Page 2-41 equations
+\begin{equation}
+\varepsilon_z = \pdv{w}{z}
+\end{equation}
+\begin{equation}
+\varepsilon_{\theta} = \frac{u}{\bar{r}}
+\end{equation}
+where $\bar{r}$ is the radius of the monoplane. Strain across the thickness of the shell is allowed. In shell theory, since the radial stress can be neglected, and since the hoop stress, $\sigma_{\theta}$, and axial stress, $\sigma_{z}$, are uniform across the thickness when bending is not considered, the radial strain is due only to the Poisson effect and is uniform across the thickness. (Normally, radial strains are not considered in a shell theory, but plastic radial strains must be included when plastic deformations are considered.)  
+\begin{equation}
+\varepsilon_{\theta}=\frac{1}{E} \left(\sigma_{\theta}-\nu\sigma_{z} \right)+\varepsilon_{\theta}^P+d\varepsilon_{\theta}^P+\int\limits_{T_0}^T\alpha_{\theta}dT
+\end{equation}
+\begin{equation}
+\varepsilon_{z}=\frac{1}{E} \left(\sigma_{z}-\nu\sigma_{\theta} \right)+\varepsilon_{z}^P+d\varepsilon_{z}^P+\int\limits_{T_0}^T\alpha_{z}dT
+\end{equation}
+\begin{equation}
+\varepsilon_r=\frac{1}{E} \left(\sigma_{\theta}-\sigma_{z} \right)+\varepsilon_{r}^P+d\varepsilon_{r}^P+\int\limits_{T_0}^T\alpha_{r}dT
+\end{equation}
+Equations from page 2-40
+\begin{equation}
+\sigma_{\theta}=\frac{r_{i}P_{i}-r_{o}P_{o}}{t}
+\end{equation}
+\begin{equation}
+\sigma_{z}=\frac{r_{i}^{2}P_{i}-r_{o}^{2}P_{o}}{r_{o}^{2}-r_{i}^{2}}
+\end{equation}
+Page 2-39 Equations
+\begin{equation}
+u_r^{fuel} \geq u_r^{clad}+\delta
+\end{equation}
+If Equation (2-99) is satisfied, the fuel is in contact with the cladding. The loading history enters into this decision by virtue of the permanent plastic cladding strains which are applied to the as-fabricated geometry. These plastic strains, and total effective plastic strain, $\varepsilon^P$, are retained for use in subsequent calculations. 
+\begin{equation}
+u_r^{fuel} = u_r^{clad}-\delta
+\end{equation}
+Note that only the additional strain which occurs in the fuel after lockup has occurred is transferred to the cladding. Thus, if $\varepsilon_{z,o}^{clad}$ is the axial strain in the cladding just prior to contact, and $\varepsilon_{z,o}^{fuel}$ is the corresponding axial strain in the fuel, then the no-slippage condition in the axial direction becomes
+\begin{equation}
+\varepsilon_{z}^{clad}-\varepsilon_{z,o}^{clad}=\varepsilon_{z}^{fuel}-\varepsilon_{z,o}^{fuel}
+\end{equation}
+The values of the “pres-trains”, $\varepsilon_{z,o}^{fuel}$ and $\varepsilon_{z,o}^{clad}$, are set equal to the values of the strains that existed in the fuel and cladding at the time of fuel-cladding gap closure and are stored and used in the cladding sequence of calculations. The values are updated at the end of any load increment during which the fuel-cladding gap is closed.\\
+\\
+After $u_{z}^{clad}$ and $\varepsilon_{z}^{clad}$  have been computed, they are used in a calculation which considers a cylindrical shell with prescribed axial strain, external pressure, and prescribed radial displacement of the inside surface. After the solution is obtained, a value of the fuel-cladding interfile pressure is computed along with new plastic strains and stresses.\\
+\\
+Equations on Page 2-37
+\begin{equation}
+\dot{V}=g \left( \sigma_{m},T,t,V_{avail} \right)
+\end{equation}
+\begin{equation}
+\sigma_m = \left(\sigma_1+\sigma_2+\sigma_3 \right)/3
+\end{equation}
+\begin{equation}
+dV^c=d\varepsilon_1^c+d\varepsilon_2^c+d\varepsilon_3^c
+\end{equation}
+Equations on Page 2-35
+\begin{equation}
+\sigma_r=\frac{P_{i}r_{i}^2-P_{o}r_{o}^2+\frac{r_{i}^2 r_{o}^2 \left( P_{o}-P_{i} \right)}{r^2}}{r_{o}^2-r_{i}^2}
+\end{equation}
+\begin{equation}
+\sigma_t=\frac{P_{i}r_{i}^2-P_{o}r_{o}^2-\frac{r_{i}^2 r_{o}^2 \left( P_{o}-P_{i} \right)}{r^2}}{r_{o}^2-r_{i}^2}
+\end{equation}
+\begin{equation}
+\sigma_{l}=\frac{P_{i}r_{i}^{2}-P_{o}r_{o}^{2}}{r_{o}^{2}-r_{i}^{2}}
+\end{equation}
+\begin{equation}
+\sigma_{eff}= \sqrt{\frac{1}{2}\left( \left(\sigma_l-\sigma_t \right)^2+\left(\sigma_t-\sigma_r \right)^2+\left(\sigma_r-\sigma_l \right)^2 \right)}
+\end{equation}
+Equations on Page 2-33
+\begin{equation}
+\dot{\varepsilon}_{th}=A\frac{E}{T} \left( sinh \frac{a_i \sigma_{eff}}{E} \right)^n exp \left( \frac{-Q}{RT} \right)
+\end{equation}
+\begin{equation}
+\dot{\varepsilon}_{irr}=C_0\cdot \phi^{C_1}\cdot\sigma_{eff}^{C_2}\cdot f(T)
+\end{equation}
+$\dot{\varepsilon}_{th}$, $\dot{\varepsilon}_{irr}$  = thermal and irradiation strain rate, respectively (m/m/hr)
+\begin{equation}
+\dot{\varepsilon}_{th+irr}=\dot{\varepsilon}_{th}+\dot{\varepsilon}_{irr}
+\end{equation}
+\begin{equation}
+\varepsilon_p^S=0.0216\cdot \dot{\varepsilon}_{th+irr}^{0.109} \left( 2 - tanh \left( 35500 \cdot \dot{\varepsilon}_{th+irr} \right) \right)^{-2.05}
+\end{equation}
+\begin{equation}
+\varepsilon_H= \varepsilon_P^S \left( 1-exp \left( -52 \cdot \sqrt{\dot{\varepsilon}_{th+irr} \cdot t} \right) \right)+\dot{\varepsilon}_{th+irr} \cdot t
+\end{equation}
+\begin{equation}
+\dot{\varepsilon}_H= \frac{52 \cdot \varepsilon_P^S \cdot \dot{\varepsilon}_{th+irr}}{2 \cdot t^{\frac{1}{2}}} exp \left( -52 \cdot \sqrt{\dot{\varepsilon}_{th+irr} \cdot t} \right) +\dot{\varepsilon}_{th+irr}
+\end{equation}
+Equations on Page 2-32
+\begin{equation}
+d\varepsilon_1^c=1.5 \frac{\dot{\varepsilon}\Delta t}{\sigma_e}S_1+\frac{\dot{V}\Delta t}{9} \frac{\sigma_1+\sigma_2+\sigma_3}{\sigma_m}
+\end{equation}
+\begin{equation}
+d\varepsilon_2^c=1.5 \frac{\dot{\varepsilon}\Delta t}{\sigma_e}S_2+\frac{\dot{V}\Delta t}{9} \frac{\sigma_1+\sigma_2+\sigma_3}{\sigma_m}
+\end{equation}
+\begin{equation}
+d\varepsilon_3^c=1.5 \frac{\dot{\varepsilon}\Delta t}{\sigma_e}S_3+\frac{\dot{V}\Delta t}{9} \frac{\sigma_1+\sigma_2+\sigma_3}{\sigma_m}
+\end{equation}
+\begin{equation}
+\varepsilon^c=f(\sigma, T, t, \phi)
+\end{equation}
+\begin{equation}
+\dot{\varepsilon}^c=f(\sigma, \varepsilon^c, T, t, \phi)
+\end{equation}
+Equations from Page 2-30
+\begin{equation}
+\varepsilon_{ij}=\frac{1+\nu}{E}\sigma_{ij}-\delta_{ij} \left( \frac{\nu}{E} \sigma_{kk}-\int \alpha dT \right) +\varsigma_{ij}^{P} +d\varsigma_{ij}^{P}
+\end{equation}
+\begin{equation}
+\varepsilon_{ij\text{ }kl}+\varepsilon_{kl\text{ }ij}-\varepsilon_{ik\text{ }jl}-\varepsilon_{jl\text{ }ik}=0
+\end{equation}
+\end{document}

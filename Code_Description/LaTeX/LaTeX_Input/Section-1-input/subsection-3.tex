@@ -1,0 +1,77 @@
+%-------------------------------------------------------------------------%
+% Section 1.3                                                             %
+%-------------------------------------------------------------------------%
+\section{Report Outline and Relation to Other Reports} \label{section:outline}
+
+The full documentation of this fuel performance code is described in three documents. The code
+structure and behavioral models are described in the Code Description document (this document).
+Section~\ref{chapter:general-modeling-description} and Section
+\ref{chapter:calculation-cladding-tsurf} of this report deal with the modeling concepts and the code
+description, respectively. Instructions for creating an input file are discussed in
+Appendix~\ref{section:running-the-code}. The reader is cautioned that, although the thermal and
+mechanical models are described separately, they actually are highly interrelated.
+Section~\ref{section:coupling-of-thermal-mechanical-models} is included to outline these
+interrelationships.
+\\
+\\
+This report does not present an assessment of the code performance with respect to in-reactor data.
+Critical comparisons with experimental data from well-characterized, instrumented test rods are
+presented in Volume 2 of this NUREG series.
+\\
+\\
+The basic fuel, cladding, and gas material properties used in FAST-1.0 are described in the third
+volume of this NUREG series, titled ``MatProp: Nuclear Material Properties Library''.
+Table~\ref{tab:roadmap_model_docs} shows where each specific material property and model used in the
+NRC fuel performance codes are documented.
+\renewcommand{\captiontext}{Roadmap to Documentation of models and properties in FAST-1.0}
+    \begin{longtable}{|m{8.0cm} | m{7.0cm}|}
+    \caption{\captiontext}\label{tab:roadmap_model_docs}    \\  \hline
+        \textbf{Model/Property}                                     &       \textbf{FAST-1.0} \\ \hline
+       \endfirsthead
+        \caption[]{\captiontext~(continued)}                \\  \hline
+        \textbf{Model/Property}                                     &       \textbf{FAST-1.0}
+       \endhead
+            Fuel thermal expansion 					                &					 Nuclear Material Properties Library			    \\\hline
+            Fuel melting temperature 					            &					 Nuclear Material Properties Library                \\\hline
+            Fuel specific heat 					                    &					 Nuclear Material Properties Library			    \\\hline
+            Fuel enthalpy 					                        &					 Nuclear Material Properties Library		        \\\hline
+            Fuel emissivity 					                    &					 Nuclear Material Properties Library			    \\\hline
+            Fuel densification 					                     &					 Nuclear Material Properties Library			    \\\hline
+            Fuel solid swelling 					                &					 Nuclear Material Properties Library			    \\\hline
+            Fuel gaseous swelling 					                &					 Nuclear Material Properties Library			    \\\hline
+            Fission gas release 					                &					 FAST code description			                    \\\hline
+            Fuel relocation 					                    &					 FAST code description			                    \\\hline
+            Fuel grain growth 					                    &					 FAST code description		                        \\\hline
+            High burnup rim model 					                &					 FAST code description                              \\\hline
+            Nitrogen release 					                    &					 FAST code description	                           	\\\hline
+            Helium release 								            &					 FAST code description		                        \\\hline
+            Radial power profile 							        &					 FAST code description                              \\\hline
+            Stored energy 									        &					 FAST code description		                        \\\hline
+            Decay heat model 								        &					 FAST code description	                            \\\hline
+            Fuel and cladding temperature solution 			        &					 FAST code description			                    \\\hline
+            Cladding thermal conductivity 					        &					 Nuclear Material Properties Library			    \\\hline
+            Cladding thermal expansion       				        &					 Nuclear Material Properties Library			    \\\hline
+            Cladding elastic modulus 						        &					 Nuclear Material Properties Library		        \\\hline
+            Cladding creep model 							        &					 Nuclear Material Properties Library			    \\\hline
+            Cladding specific heat 							        &					 Nuclear Material Properties Library			    \\\hline
+            Cladding emissivity 							        &					 Nuclear Material Properties Library			    \\\hline
+            Cladding axial growth 							        &					 Nuclear Material Properties Library			    \\\hline
+            Cladding Meyer hardness 						        &					 Nuclear Material Properties Library			    \\\hline
+            Cladding annealing 								        &					 FAST code description			                    \\\hline
+            Cladding yield stress and plastic deformation 	        &					 FAST code description			                    \\\hline
+            Cladding failure criteria 						        &					 FAST code description		                        \\\hline
+            Cladding waterside corrosion 					        &					 FAST code description	                           	\\\hline
+            Cladding hydrogen pickup 						        &					 FAST code description		                        \\\hline
+            Cladding high temperature oxidation 			        &					 FAST code description                      	    \\\hline
+            Cladding ballooning model 						        &					 FAST code description		                        \\\hline
+            Cladding mechanical deformation 				        &					 FAST code description			                    \\\hline
+            Oxide thermal conductivity 						        &					 Nuclear Material Properties Library			    \\\hline
+            Crud thermal conductivity 						        &					 Nuclear Material Properties Library			    \\\hline
+            Gas conductivity 								        &					 Nuclear Material Properties Library			    \\\hline
+            Gap conductance 								        &					 FAST code description			                    \\\hline
+            Plenum gas temperature 							        &					 FAST code description			                    \\\hline
+            Rod internal pressure 							        &					 FAST code description			                    \\\hline
+            Coolant temperature and heat transfer coefficients 		&					 FAST code description			                    \\\hline
+            VVER fuel and cladding models 							&					 NUREG/IA-0164 (\cite{ref:Shestopalov1999a})		\\\hline
+            Cladding FEA model 										&					 VTT-R-11337-06 (\cite{ref:Knuutila2006a})	        \\\hline
+  \end{longtable}

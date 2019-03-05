@@ -1,0 +1,39 @@
+%-------------------------------------------------------------------------%
+% Section 1.2                                                             %
+%-------------------------------------------------------------------------%
+\section{Limitation of FAST-1.0} \label{section:limitations}
+The FAST-1.0 code has inherent limitations. The major limitations are as follows:
+\begin{enumerate}
+
+    \item The code is limited to modeling fuel consisting of \UO, \UO-($<10\percent$
+        wt\percent)\element{Pu}{}\element{O}{2}(MOX), and \UO-($<10\percent$
+        wt\percent\element{Gd}{2}\element{O}{3}) pellets in zirconium alloy cladding with a gas gap
+        under light and heavy water reactor conditions from STP up to PWR operating conditions. Some
+        additional fuel, cladding and coolant materials are available (see MatLib Documentation) but
+        have not been validated, and additional model changes may be required to accommodate them.
+
+    \item The code has been validated up to a rod-average burnup of \SInum{62}{GWd/MTU}, although
+        the code should give reasonable predictions for burnup beyond this level for some
+        parameters.  Also, the code is not validated beyond the fuel or cladding melting
+        temperature. If melting of the fuel or the cladding occurs, the code will stop.
+
+    \item The thermal models of the code are based on 1-D radial heat flow. This assumption is valid
+        for modeling a typical fuel rod (i.e., with a large length-to-diameter ratio). Similarly,
+        the fission gas release models are based on steady-state and slow power ramp data and do not
+        reflect release rates expected for rapid power changes. Therefore, under normal-operation
+        analysis, time steps should be no less than \SInum{0.1}{day} but no greater than
+        \SInum{50}{days.} When modeling transients or power ramps, fission gas release model will
+        not allow for re-solutioning of the gases.
+
+    \item Only small cladding deformations ($<5\percent$ hoop strain) are meaningfully calculated.
+        All of the thermal and mechanics modeling assumes an axisymmetric fuel rod with no axial
+        constraints. These assumptions are reasonable for modeling an LWR fuel rod.
+
+    \item The code's ability to predict cladding strains resulting from pellet-cladding mechanical
+        interaction has been assessed against power ramp data. FAST has been found to slightly
+        over-predict cladding strain up to a burnup of about \SInum{65}{GWd/MTU}. The limited high
+        burnup data suggests that FAST may under predict the cladding strain during power ramps at
+        very high burnup (i.e., $< \SInum{65}{GWd/MTU}$) for hold times greater than
+        \SInum{30}{minutes}.
+
+\end{enumerate}

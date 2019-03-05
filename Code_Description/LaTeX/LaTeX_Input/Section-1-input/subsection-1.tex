@@ -1,0 +1,78 @@
+%-------------------------------------------------------------------------%
+% Section 1.1                                                             %
+%-------------------------------------------------------------------------%
+\section{Objective of the FAST Code} \label{section:objective}
+The ability to accurately calculate the performance of light-water reactor (LWR) fuel rods under
+long-term burnup conditions is a major objective of the reactor safety research program being
+conducted by the U.S. Nuclear Regulatory Commission (NRC). To achieve this objective, the NRC has
+sponsored an extensive program of analytical computer code development, as well as both in-pile and
+out-of-pile experiments to benchmark and assess the analytical code capabilities. The computer code
+originally developed to calculate the long-term burnup response of a single fuel rod is FRAPCON-3.
+This report describes FAST-1.0, the first-release of this code.
+\\
+\\
+FAST is an analytical tool that calculates the thermal-mechanical behavior of nuclear fuel when
+given power and boundary conditions. There are two conditions that are commonly referred to as
+``steady-state'' and ``transient''. Steady-state means changes are sufficiently slow for the term
+``steady-state'' to apply (i.e., time-independent). This includes situations such as long periods at
+constant power and slow power ramps that are typical of normal power reactor operations.  Transient
+means rapid power and/or boundary condition changes (time-dependent) such as an AOO, RIA or LOCA
+event.  The code calculates the variation with time of all significant fuel rod variables, including
+fuel and cladding temperatures, cladding hoop strain, cladding oxidation, hydriding, fuel
+irradiation swelling, fuel densification, fission gas release, and rod internal gas pressure.
+\\
+\\
+FAST uses fuel, cladding, and gas material properties from MatLib that have been recently updated to
+include burnup-dependent properties and properties for advanced zirconium-based cladding alloys.
+These properties are documented elsewhere (\cite{ref:Luscher2014b}). The only
+material properties not included in the updated MATPRO document are fission gas release, cladding
+corrosion, and cladding hydrogen pickup, and these properties are described in this document. The
+material properties in FRAPCON-3 are contained in modular subroutines that define material
+properties for temperatures ranging from room temperatures to temperatures above melting and for
+rod-average burnup levels between 0 and \SInum{62}{GWd/MTU}. Each subroutine defines only a single
+material property. For example, FAST contains subroutines defining fuel thermal conductivity as a
+function of fuel temperature, fuel density, and burnup; fuel thermal expansion as a function of fuel
+temperature; and the cladding stress-strain relation as a function of cladding temperature, strain
+rate, cold work, hydride content, and fast neutron fluence.
+\\
+\\
+The predecessors of FAST are the FRAPCON-4.0 and FRAPTRAN-2.0 codes.  The FRAPCON-3 and FRAPCON-4
+codes were developed at Pacific Northwest National Laboratory (PNNL). The code underwent 11 total
+releases, starting with FRAPCON-3 v1.0 (\cite{ref:Berna1997}) in 1997 through
+FRAPCON-4.0 Patch 1 (\cite{ref:Geelhood2015a}) in 2015. The FRAPTRAN-1 and
+FRAPTRAN-2 codes
+\\
+\\
+FAST-1.0, takes a major step toward code simplification by removing extra input parameters and model
+selection features that cannot easily be measured and have a large impact on results. Also,
+reasonable default values are set for some parameters. The only model options available to the user
+are in the selection of the mechanical model and in the selection of the fission gas release model.
+\\
+\\
+For the mechanical model, the user may select the FRACAS-I model (finite difference model) or the
+FEA (finite element analysis) model. The FRACAS-I model is recommended by PNNL and is the default
+selection. The FEA model is useful for modeling cladding axial strain in cases where there is slip
+between the fuel and cladding. The details of the FEA model are described elsewhere
+(\cite{ref:Knuutila2006a}). This document is posted on the FRAPCON/FRAPTRAN code users'
+group website \url{http://frapcon.labworks.org}. Only the FRACAS-1 mechanical model will be
+described in this document.
+\\
+\\
+For the fission gas release model, the user can select the Massih model, one of the ANS-5.4 models
+(ANS-1982 or ANS-2011), or the FRAPFGR model. The Massih model is recommended and is the default
+model. The ANS-5.4 1982 model is useful for calculating the release of short-lived radioactive gas
+nuclides and has been shown to provide very conservative release values. The ANS-5.4 2011 model also
+calcualtes the short-lived radioactive gas nuclides but is non-conservative with respect to total
+fission gas release as it does not include any long-lived nuclides (such as \element{Kr}{} and
+\element{Xe}{}).  The FRAPFGR model is useful for determining the distribution of fission gases
+within the fuel pellet (grain boundary vs. retained within grains). The Massih and FRAPFGR models
+will be described in this document.
+\\
+\\
+FAST-1.0 includes fuel models for uranium dioxide (\UO), mixed oxide fuel or MOX ((\element{U}{},
+\element{Pu}{})\element{O}{2}), integral fuel burnable absorber (IFBA) and gadolinia doped fuel, and
+cladding models for Zircaloy-2, Zircaloy-4, M5, ZIRLO, and Optimized ZIRLO.  For scoping studies,
+FAST has been updated with properties for ATF candidate fuels (Uranium Silicde,
+\element{U}{3}\element{Si}{2}) and claddings (\element{FeCrAl}{}, \element{SiC}{}), as well as
+metallic fuels (\element{UPuZr}{}).  Other code improvements include an Excel-based input generator,
+an Excel-based plot routine, and the ability to bias model predictions for uncertainty analyses.

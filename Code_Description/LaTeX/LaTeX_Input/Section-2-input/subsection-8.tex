@@ -1,0 +1,45 @@
+\section{Transient Options}\label{section:transient-options}
+
+The development of FAST was focused around the merger of the transient capabilities from
+FRAPTRAN-2.0 coupled with the steady-state capabilities of FRAPCON-4.0. A set of ``transient'' input
+options allow the user to control the time-dependent thermal/mechanical code solution and transient
+fuel rod models. These options are described in Section~\ref{section:transient_block}. The transient
+code solution control is based on the problem time-step size (and code output intervals) and
+convergence criteria. The recommended time-step size to be used is outlined in
+Table~\ref{tab:recommended_time_step_sizes_for_various_transients}.
+
+\begin{ThreePartTable}
+    \begin{TableNotes}
+        \footnotesize
+    \item[$*$] 
+        Will default to using the Steady-State solution.
+    \end{TableNotes}
+    \begin{longtable}[c]{c c c}
+   \caption{Recommended Time Step Sizes for Various Transients}
+   \label{tab:recommended_time_step_sizes_for_various_transients}\\
+   \hline
+    Transient/Accident           &          Period of Transient/Accident            &       time Step, s \\\hline
+   \endfirsthead
+   \caption[]{Recommended Time Step Sizes for Various Transients (continued)}\\ \hline
+    Transient/Accident           &          Period of Transient/Accident            &       time Step, s    \\\hline
+   \endhead
+   \insertTableNotes
+   \endlastfoot
+        Steady-state equilibrium                &                     & 0.0 \tnote{$*$}     \\
+
+        Large break loss of coolant             & Blowdown            & 0.2                 \\
+        (LBLOCA)                                & Reflood             & 0.5                 \\
+
+        Small break loss of coolant             & Prior to SCRAM      & 0.2                 \\
+        (SBLOCA)                                & Adiabatic heatup    & 2.0                 \\
+                                                & Quenching           & 0.5                 \\
+
+        Reactivity-initiated accident  (RIA)    & During power pulse  & $\num{01.0E-5}$ \\
+        Anticipated transient with SCRAM (ATWS) &                     & 0.2                  \\ 
+                                                               
+  \end{longtable}
+\end{ThreePartTable}
+
+The model options in the \textit{transient} input block define the high
+temperature cladding oxidation model, the high temperature cladding
+deformation (ballooning) model, and the time-step size control.

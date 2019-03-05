@@ -1,0 +1,94 @@
+\section{Cladding Failure Models}\label{section:cladding-failure-models}
+
+FAST has two principal models that are used to predict when cladding failure happens. The first
+failure model is applicable mainly to RIA events where deformation is due to pellet cladding
+mechanical interaction (fuel expansion into the cladding) and the temperature of the cladding is
+relatively low ($<\SInum{700}{K}$). The second failure model is applicable mainly to LOCA events,
+but may also be experienced under certain RIAs, where deformation is due to a high-pressure
+difference across the cladding (high internal gas pressure with low external rod pressure) coupled
+with high cladding temperature ($<\SInum{700}{K}$). In either case, when the code predicts cladding
+failure, the internal gas is assumed to become steam and the cladding inner surface will oxidize for
+axial nodes \SInum{1.5}{in.} above and below the failed node.
+
+\subsection{Low-Temperature PCMI Cladding Failure Model}\label{section:low-temperature-pcmi-cladding-failure-model}
+
+At low temperature, where PCMI is the driving force for cladding deformation, a model based on
+uniform plastic elongation from irradiated cladding (\cite{ref:Geelhood2008a}) is
+used as the failure criteria. This model is a function of temperature and hydrogen concentration and
+is described below.
+
+\begin{equation}
+    \label{eq:uniform_elongation_excess_hydrogen_Zirc}
+    UE =  
+    \begin{cases}
+        min\left( UE_{0},UE_{Hex} \right)       & H_{ex} < \SInum{650}{ppm}   \\
+        5\percent                               & H_{ex} \geq \SInum{650}{ppm} 
+    \end{cases}
+\end{equation}
+Where,
+\ind{   $UE$        =  Uniform plastic elongation \sinum{\percent} }
+\ind{   $UE_{0}$    =  2.2\percent                           }
+and
+\begin{equation}
+    UE_{Hex} =
+    \begin{cases}
+        UE_{0},                     &  H_{ex} = \SInum{0}{ppm} \\
+        A{H_{ex}}^{- p}             &  H_{ex} > \SInum{0}{ppm} 
+    \end{cases}
+\end{equation}
+
+\begin{equation}
+    A = 
+    \begin{cases}
+        1211e^{- 0.00927T}  &  T < \SInum{700}{K} \\
+        1.840803            &  T \geq \SInum{700}{K} \\
+    \end{cases}
+\end{equation}
+
+\begin{equation}
+    p = 
+    \begin{cases}
+        1.355231 - 0.001783T   &  T < \SInum{700}{K} \\
+        0.107131               &  T \geq \SInum{700}{K} 
+    \end{cases}
+\end{equation}
+        
+\begin{equation}
+    H_{ex} = max(0,H_{Tot} - H_{Sol}) 
+\end{equation}
+
+\begin{equation}
+    H_{Sol} = \num{1.2E5}\exp\left( \frac{- 8550}{1.985887T} \right)
+\end{equation}
+
+Where,
+\ind{   $H_{Tot}$    =   Total hydrogen in cladding \sinum{ppm}  }
+\ind{   $T$          =   Temperature                \sinum{K}    }
+
+If the predicted plastic hoop stress for any axial node exceeds the model prediction of uniform
+elongation based on the hydrogen concentration and average cladding temperature at that axial node,
+the code assumes the cladding has failed at that node. The cladding average temperature is taken as
+the average of each of the cladding radial node temperatures. A plot of predicted minus measured
+uniform plastic elongation data provided in
+Figure~\ref{fig:predicted_minus_measured_uniform_elongation_Zirc} as a function of excess hydrogen
+($H_{ex}$) demonstrates that the uniform elongation model provides a reasonable fit as a function of
+excess hydrogen level (hydrogen above the solubility limit) in the cladding. Further comparisons to
+the uniform elongation data are provided in \cite{ref:Geelhood2008a}. It is noted
+that this failure model was not adjusted to fit RIA data and does a good job predicting failure and
+non-failure in RIA tests \colorbox{yellow}{(Geelhood and Luscher 2014b)}.
+
+{\color{red}Need the reference to Geelhood and Luscher 2014b} 
+
+\begin{figure}
+ \includegraphics[height=\figheight\textheight]{../media/Zircaloy_uniform_elongation_PNNL_database}
+ \caption{Predicted Minus Measured Uniform Elongation from Irradiated Samples from the PNNL Database
+    as a Function of Excess Hydrogen (\(\SInum{293}{K} \leq T \leq \SInum{795}{K}\) and \(0 \leq \Phi \leq \SInum{14.0E25}{n/m^{2}}\))}
+    \label{fig:predicted_minus_measured_uniform_elongation_Zirc}
+\end{figure}
+
+\subsection{High-Temperature Cladding Ballooning Failure Model}\label{section:high-temperature-cladding-ballooning-failure-model}
+
+In the case of a LOCA, the cladding can fail by ballooning and burst.  The BALON2 model is used to
+model the ballooning in the cladding.  FRAPTRAN contains empirical stress and strain limits that it
+uses to predict when cladding failure will occur. These limits are discussed in detail in
+Section~\ref{section:cladding-ballooning-model}.

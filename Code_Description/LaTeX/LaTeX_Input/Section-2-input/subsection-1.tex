@@ -1,0 +1,147 @@
+%-------------------------------------------------------------------------%
+% Solution Scheme
+%-------------------------------------------------------------------------%
+\section{Solution Scheme}\addcontentsline{\arabic{section}-toc}{subsection}{Solution Scheme}
+
+FAST-1.0 has two solution schemes for solving the conduction equation in order to obtain the
+temperature profile; one is for the steady-state (time-independent) solution and the other is for
+the transient (time-dependent) solution.
+%-------------------------------------------------------------------------%
+% Steady State
+%-------------------------------------------------------------------------%
+\subsection{Steady State} \label{section:steady-state}
+
+FAST code iteratively calculates the interrelated effects of fuel and cladding temperature, rod
+internal gas pressure, fuel and cladding deformation, release of fission product gases, fuel
+swelling and densification, cladding thermal expansion and irradiation-induced growth, cladding
+corrosion and hydriding, and crud deposition for a given buildup rate as functions of time and
+fuel-rod-specific power.
+\\
+\\
+\noindent
+The calculated procedure is illustrated in Figure~\ref{fig:fast-flowchart}, with a simplified
+flowchart of FAST. A detailed flowchart is provided in
+Section~\ref{chapter:calculation-cladding-tsurf}. The calculation begins by processing input data.
+Next, the initial fuel rod state is determined through a self-initialization calculation. Time is
+advanced according to the input-specified time-step size, a steady-state solution is performed, and
+the new fuel rod state is determined. The new fuel rod state provides the initial state conditions
+for the next time step. The calculations are cycled in this manner for the user-specified number of
+time steps.
+\\
+\\
+The solution for each time step consists of 
+
+\begin{enumerate}
+
+    \item Calculating the temperature of the fuel and the cladding 
+
+    \item Calculating fuel and cladding deformation 
+        
+    \item Calculating the fission product generation and release, void volume, and fuel rod internal
+        gas pressure 
+        
+\end{enumerate}
+
+Each calculation is made in a separate subcode. As shown in Figure~\ref{fig:fast-flowchart}, the
+fuel rod response for each time step is determined by repeated cycling through two nested loops of
+iterative calculations until the fuel-cladding gap temperature difference and internal gas pressure
+converge.
+\\
+\\
+For the FRACAS-I (\cite{ref:Bohn1977}) mechanical model, the fuel temperature and
+deformation are alternately calculated in the inner loop. On the first cycle through this loop for
+each time step, the gap conductance is computed using the fuel-cladding gap size from the previous
+time step. Then the fuel rod temperature distribution is computed. This temperature distribution
+feeds the deformation calculation by influencing the fuel and cladding thermal expansions and the
+cladding stress-strain relation. An updated fuel-cladding gap size is calculated and used in the gap
+conductance calculation on the next cycle through the inner loop. The cyclic process through the
+inner loop is repeated until two successive cycles calculate essentially the same temperature
+distribution.
+\\
+\\
+The outer loop of calculations is cycled in a manner similar to that of the inner loop, but with the
+amount of internal gas being determined during each iteration. The calculation alternates between
+the fuel rod void volume-gas pressure calculation and the fuel rod temperature-deformation
+calculation. On the first cycle through the outer loop for each time step, the gas pressure from the
+previous time step is used. For each cycle through the outer loop, the number of gas moles is
+calculated and the updated gas pressure computed and fed back to the deformation and temperature
+calculations (the inner loop). The calculations are cycled until two successive cycles calculate
+essentially the same gas pressure, and then a new power-time step is begun.
+
+\begin{figure}
+    \includegraphics[height=\figheight\textheight]{../media/image1}
+    \caption{Simplified FAST flowchart}
+    \label{fig:fast-flowchart}
+\end{figure}
+%-------------------------------------------------------------------------%
+% Transient
+%-------------------------------------------------------------------------%
+\subsection{Transient} \label{section:transient}
+The transient solution to the conduction equation is similar to the steady-state solution described
+above in Section~\ref{section:steady-state} with the addition of the time-dependent terms (density,
+specific heat and time).  The code iteratively calculate the interrelated effects of fuel and
+cladding temperature, fuel rod plenum temperature, fuel and cladding deformation, and rod internal
+gas pressure. Charts of the overall flow of the computations are shown in
+Figures~\ref{fig:FAST-flowchart-part1} through~\ref{fig:FAST-flowchart-part3}. The input
+requirements and initialization procedure are shown in Figure~\ref{fig:FAST-flowchart-part1}; the
+temperature, mechanical response, and pressure calculations are shown in
+Figure~\ref{fig:FAST-flowchart-part2}; and the cladding oxidation, local cladding ballooning, and
+fission gas release calculations are shown in Figure~\ref{fig:FAST-flowchart-part3}.
+\\
+\\
+As shown in Figure~\ref{fig:FAST-flowchart-part2}, the temperature, mechanical response, and
+internal gas pressure calculations are performed iteratively so that all significant interactions
+are taken into account.  For example, the deformation of the cladding affects the fuel rod internal
+gas pressure because the internal volume of the rod is changed. The deformation of the cladding also
+affects the temperature of the fuel and cladding because the flow of heat from the fuel to the
+cladding is dependent on the fuel-cladding gap width and interface pressure when the gap is closed.
+
+\begin{figure}[H]
+    \includegraphics[height=\figheight\textheight]{../media/image2}
+    \caption{Flowchart of FAST (Part 1)}
+    \label{fig:FAST-flowchart-part1}
+\end{figure}
+
+\begin{figure}
+    \centering
+    \includegraphics[height=\figheight\textheight]{../media/image3}
+    \caption{Flowchart of FAST (Part 2)}
+    \label{fig:FAST-flowchart-part2}
+\end{figure}
+
+\begin{figure}
+    \centering
+    \includegraphics[height=\figheight\textheight]{../media/image4}
+    \caption{Flowchart of FAST (Part 3)}
+    \label{fig:FAST-flowchart-part3}
+\end{figure}
+
+These and all other interactions are accounted for by repeatedly cycling through two nested loops of
+calculations until convergence is achieved. In the outside loop, the fuel rod temperature and
+mechanical response are alternately calculated. On the first cycle through this loop, the gap
+conductance is calculated using the fuel-cladding gap size from the previous time step.
+\\
+\\
+Then the fuel rod temperature distribution is calculated. This temperature
+distribution then feeds into the mechanical response calculations and
+influences such variables as the fuel and cladding thermal expansions and
+the cladding stress-strain relation. A new fuel-cladding gap is calculated
+which is used in the gap conductance calculation on the next cycle of
+calculations. The calculations are cycled until two successive cycles
+compute the same temperature distribution within the convergence criteria.
+\\
+\\
+The inner loop of calculations, shown in Figure~\ref{fig:FAST-flowchart-part2}, is cycled in a
+manner similar to that used for the outer loop, but with the internal gas pressure being the
+variable determined by iteration. The fuel rod mechanical response and gas pressure are alternately
+determined. The temperature distribution remains the same during the inner loop of calculations. On
+the first cycle through this loop, the mechanical response is calculated using the previous time
+step gas pressure. Variables that influence the gas pressure solution, such as fuel-cladding gap
+width and plenum volume, are calculated. Then the gas pressure calculation is made, and an updated
+cladding internal gas pressure is fed back to the mechanical response calculations. The calculations
+are cycled until two successive cycles result in the same gas pressure within the convergence
+criteria.
+\\
+\\
+After the two loops of calculations have converged, cladding oxidation, local cladding ballooning,
+and fission gas release are calculated. These calculations are performed only once per time step.

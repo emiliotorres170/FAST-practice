@@ -1,0 +1,79 @@
+\documentclass[12pt]{article}
+\input{preamble}
+\fancyhead[L]{Basic \LaTeX Commands}
+\fancyhead[C]{}
+\fancyhead[R]{E. Torres}
+
+\fancyfoot[L]{\today}
+\fancyfoot[C]{}
+\fancyfoot[R]{\thepage}
+
+\begin{document}
+\section{Basic Commands}
+\subsection{Adding Figure}
+A figure can be added using the following:
+\begin{verbatim}
+\begin{figure}
+    \includegraphics[height=\figheight\textheight]{../media/file-name}
+    \caption{Figure Caption}
+    \label{fig:figure-label}
+\end{figure}
+\end{verbatim}
+For the height we are trying to use the same height for all the figures so we defined a global
+variable \texttt{figheight}, however some of the figures not generated in python have a different
+height. Pointing to the figure is really simply Since all of the figures are contained in the media
+directory the only line you would have to change is the filename.
+\subsection{Adding a reference}
+A citation can be added using the following:
+\begin{verbatim}
+Text text text from REFERENCE \cite{ref:First-author-lastnameYYYY}
+\end{verbatim}
+In general we are using the lastname of the first author and the four year digit, but since there
+are so many reference and some of the authors repeat we had to add letters to end of the year (e.g., ref:Geelhood2018a,
+ref:Geelhood2018b). So if you add a reference you need to BUILD (actually build the entire document)
+and verify that the reference properly appears.
+\subsection{Adding a Table}
+The following lines are an example of how to build a table:
+\begin{verbatim}
+\begin{longtable}[c]{A{3.0cm}A{3.0cm}A{3.0cm}}
+    \caption{Table-caption} \label{tab:table-label}                 \\  \hline
+        Header1             &       Header2     &   Header3         \\  \hline
+    \endfirsthead
+    \caption{Table-caption{} (continued)}                           \\  \hline
+        Header1             &       Header2     &   Header3         \\  \hline
+    \endhead
+        1                   &   2               &   3               \\
+        4                   &   5               &   6               \\
+        7                   &   8               &   9               \\
+\end{longtable}
+\end{verbatim}
+The above makes the following table.
+\begin{longtable}[c]{A{3.0cm}A{3.0cm}A{3.0cm}}
+    \caption{Table-caption} \label{tab:table-label}                 \\  \hline
+        Header1             &       Header2     &   Header3         \\  \hline
+    \endfirsthead
+    \caption{Table-caption{} (continued)}                           \\  \hline
+        Header1             &       Header2     &   Header3         \\  \hline
+    \endhead
+        1                   &   2               &   3               \\
+        4                   &   5               &   6               \\
+        7                   &   8               &   9               \\
+\end{longtable}
+Also on the first line the \verb|A{3.0cm}| gives the length of the column where we are using the
+following indicators for the table:
+\begin{itemize}
+    \item A is centered horizontally and centered vertically wrapped column
+    \item B is centered horizontally and bottom vertical wrapped column
+    \item D is left aligned and bottom vertical wrapped column
+\end{itemize}
+\subsection{Adding Units}
+Lucas and I have worked on putting together the following standard for adding units in order to keep
+everything uniform:
+\begin{itemize}
+    \item Adding a value with units for example \SInum{32}{kW} translate to
+        \verb|\SInum{32}{kW}|
+    \item Adding just units for example \sinum{m} \verb|\sinum{m}|.
+    \item Adding numbers in scientific notation for example \num{6.022E23}
+    \verb|\num{6.022E23}|
+\end{itemize}
+\end{document}

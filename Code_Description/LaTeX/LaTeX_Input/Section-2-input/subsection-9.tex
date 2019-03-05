@@ -1,0 +1,184 @@
+\section{Heat Conduction and Temperature Solution}\label{section:heat-conduction-and-temperature-solution}
+
+Once values for the heat generation, gap conductance, and cladding surface temperature have been
+obtained, the complete temperature distribution in the fuel and cladding is obtained by applying the
+law for heat conduction in solids in one dimension.
+
+\subsection{One-Dimensional Radial Steady-State Heat Conduction}\label{section:one-dimensional-radial-steady-state-heat-conduction}
+
+\begin{equation}
+    \label{eq:one_d_heat_conduction_radial_ss}
+    \int_{S}^{}{k(\overline{x},T)\overline{\nabla}Td\overline{s}} = \int_{V}^{}S(\overline{x})dV
+\end{equation}
+
+Where,
+\ind{   $T$             =  Temperature           \sinum{K}                      }
+\ind{   $\overline{x}$  =  Spatial coordinate    \sinum{m}                      }
+\ind{   $S$             =  Heat source           \sinum{W/m^{3}} }
+\ind{   $k$             =  Thermal conductivity  \sinum{W/m-K}                  }
+
+\subsection{One-Dimensional Radial Transient Heat Conduction}\label{section:one-dimensional-radial-transient-heat-conduction}
+
+Heat conduction in the radial direction in both the fuel and cladding is
+described by Equation~\ref{eq:one_d_heat_conduction_radial_tr}.
+
+\begin{equation}
+    \label{eq:one_d_heat_conduction_radial_tr}
+    \int_{V}^{}{\rho(\overline{x},T) c_{p}(\overline{x},T)\frac{\partial T}{\partial t}dV} = \int_{S}^{}{k(\overline{x},T)\overline{\nabla}Td\overline{s}} + \int_{V}^{}S(\overline{x})dV
+\end{equation}
+
+Where,
+\ind{   $T$             =  Temperature          \sinum{K}                       }
+\ind{   $\overline{x}$  =  Spatial coordinate   \sinum{m}                       }
+\ind{   $t$             =  Time                 \sinum{s}                       }
+\ind{   $S$             =  Heat source          \sinum{W/m^{3}}  }
+\ind{   $c_{p}$         =  Specific heat        \sinum{J/kg-K}                  }
+\ind{   $\rho$          =  Density              \sinum{kg/m^{3}} }
+\ind{   $k$             =  Thermal conductivity \sinum{W/m-K}                   }
+
+The first integral calculates the enthalpy change of an arbitrary infinitesimal volume, $V$, of
+material, the second the heat transfer through the surface, $S$, of the volume, and the third the
+heat generation within the volume. The parameters \(c_{p}\)and \(k\) are temperature dependent. The
+fuel thermal conductivity is also burnup dependent. The following boundary conditions in
+Equations~\ref{eq:one_d_heat_conduction_radial_BC_1} and~\ref{eq:one_d_heat_conduction_radial_BC_2}
+are used with Equation~\ref{eq:one_d_heat_conduction_radial_tr}:
+
+\begin{equation}
+    \label{eq:one_d_heat_conduction_radial_BC_1}
+    \pdv{T}{t}\Bigr|_{r=0} = 0
+\end{equation}
+
+\begin{equation}
+    \label{eq:one_d_heat_conduction_radial_BC_2}
+    T\Bigr|_{r=0} = T_{s}
+\end{equation}
+
+Where
+\ind{   $r$       =  Radial position                    \sinum{m} }
+\ind{   $r_{0}$   =  Outer radius of fuel               \sinum{m} }
+\ind{   $T_{s}$   =  Fuel rod outer surface temperature \sinum{K} }
+
+Equation~\ref{eq:one_d_heat_conduction_radial_tr} is numerically solved by using an implicit finite
+difference approximation. The solution method is taken from the HEAT-1 code
+(\cite{ref:Wagner1963}). The solution method accounts for temperature- and time-dependent
+thermal properties; transient spatially varying heat generation; and melting and freezing of the
+fuel and cladding.
+\\
+\\
+With Figure~\ref{fig:fd_geometry_terms} as a reference for geometry terms, the finite
+difference approximation for heat conduction is shown in Equation~\ref{eq:fd_heat_conduction}.
+
+\begin{equation}
+    \label{eq:fd_heat_conduction}
+    \begin{aligned}
+    \frac{\left(T^{m+1}_{n} + T^{m}_{n}\right) \left(c_{ln}h_{ln}^{V} + c_{rn}h_{rn}^{V} \right)}{\Delta t} = &
+    -\left( T_{n}^{m + \frac{1}{2}} - T_{n - 1}^{m + \frac{1}{2}} \right)k_{ln}h_{ln}^{S} + \left( T_{n + 1}^{m + \frac{1}{2}} - T_{n}^{m + \frac{1}{2}} \right)k_{rn}h_{rn}^{S}\\
+        &+ Q_{ln}h_{ln}^{V} + Q_{rn}h_{rn}^{V}
+    \end{aligned}
+\end{equation}
+
+Where,
+\ind{   $T_{n}^{m + 1}$              =     Temperature at radial node $n$ and time point $m$+1                                                           \sinum{K}                              }
+\ind{   $T_{n}^{m + \frac{1}{2}}$    =     0.5 ($T_{n}^{m}$ + $T_{n}^{m+1}$)                                                                                                              }
+\ind{   $\mathrm{\Delta}t$           =     Time step                                                                                                     \sinum{s}                              }
+\ind{   $c_{ln}$                    =     Volumetric heat capacity on left side of node $n$                                                             \sinum{J/m^{3}-K} }
+\ind{   $c_{rn}$              =     Volumetric heat capacity on right side of node  $n$                                                           \sinum{J/m^{3}-K} }
+\ind{   $k_{ln}$                    =     Thermal conductivity at left side of node $n$                                                                 \sinum{W/m-K}                    }
+\ind{   $k_{rn}$              =     Thermal conductivity at right side of node $n$                                                                \sinum{W/m-K}                    }
+\ind{   $h_{ln}^{V}$                =     Volume weight of mesh spacing on left side of radial node $n$                                                 \sinum{m^{2}}  =     $\pi{\mathrm{\Delta}r}_{ln}\left( r_{n} - \frac{{\mathrm{\Delta}r}_{ln}}{4} \right)$                                                       }
+\ind{   $h_{rn}^{V}$          =     Volume weight on right side of node \emph{n} =     $\pi{\mathrm{\Delta}r}_{rn}\left( r_{n} + \frac{{\mathrm{\Delta}r}_{rn}}{4} \right)$ \sinum{m^2}                                           }
+\ind{   $h_{ln}^{S}$                =     Surface weight on left side of node \emph{n} =     $\frac{2\pi}{{\mathrm{\Delta}r}_{ln}}\left( r_{n} - \frac{{\mathrm{\Delta}r}_{ln}}{2} \right)$                                             }
+\ind{   $Q_{ln}$                    =     Heat generation per unit volume for mesh spacing on left side of radial node \emph{n}                         \sinum{W/m^{3}}         }
+\ind{   $Q_{rn}$              =     Heat generation per unit volume for mesh spacing on right side of radial node \emph{n}                        \sinum{W/m^{3}}         }
+
+\begin{figure}
+    \includegraphics[height=\figheight\textheight]{../media/image143}
+    \caption{Description of Geometry Terms in Finite Difference Equations for 1-D Radial Heat Conduction}
+    \label{fig:fd_geometry_terms}
+\end{figure}
+
+If a phase change from solid to liquid, or liquid to solid, occurs at radial node \(n\),
+Equation~\ref{eq:fd_heat_conduction} is modified as shown in
+Equation~\ref{eq:fd_heat_conduction_w_phase_change} to account for the storage or release of the
+heat of fusion while the temperature remains equal to the melting temperature.
+
+\begin{equation}
+    \label{eq:fd_heat_conduction_w_phase_change}
+    \rho H\left( h_{\ln}^{V} + h_{rn}^{V} \right)\dv{\alpha_{n}^{m + \frac{1}{2}}}{t} =
+   -\left( T_{L} - T_{n - 1}^{m + \frac{1}{2}} \right)k_{\ln}h_{\ln}^{S}\  + \ \left( T_{n + 1}^{m + \frac{1}{2}} - T_{L} \right)k_{rn}h_{rn}^{S} + Q_{\ln}^{m + \frac{1}{2}}h_{\ln}^{V} + Q_{rn}^{m + \frac{1}{2}}h_{rn}^{V}
+\end{equation}
+
+Where,
+\ind{   $\dv{\alpha_{n}^{m + \frac{1}{2}}}{t}$  =  Rate of change of volume fraction of material melted in the two half-mesh spaces on either side of radial node $n$ during the midpoint of the time step                   \sinum{1/s} }
+\ind{   $H$                                     =  Heat of fusion of the material                                                        \sinum{J/kg}                  }
+\ind{   $T_{L}$                                 =  Melting temperature of the material                                                   \sinum{K}                     }
+
+The phase change from solid to liquid is complete when
+
+\begin{equation}
+    \label{eq:phase_change_complete}
+    \sum_{m = M_{1}}^{M_{2}}{\frac{d\alpha_{n}^{m + \frac{1}{2}}}{\text{dt}}\mathrm{\Delta}t^{m}} = 1
+\end{equation}
+
+Where,
+\ind{   $M_{1}$                 =  Number of time step at which melting started }
+\ind{   $M_{2}$                 =  Number of time step at which melting ends    }
+\ind{   $\mathrm{\Delta}t^{m}$  =  Size of $m$-th time step \sinum{s}               }
+
+The finite difference approximations at each radial node are combined together to form one
+tri-diagonal matrix equation. The equation has the form
+
+\begin{equation}
+    \label{eq:fd_heat_conduction_tridiagonal_matrix}
+    \begin{bmatrix}
+        b_{1}   &   c_{1}   &   0       &  0        &   \dots     &   0         \\
+        a_{2}   &   b_{2}   &   c_{2}   &  0        &   \dots     &   0         \\
+        0       &   a_{3}   &   b_{3}   &  c_{3}    &   \dots     &   0         \\
+        \vdots  &   \hdots  &   \ddots  &  \ddots   &   \ddots    &   \vdots    \\
+        \vdots  &   \hdots  &   0       &  a_{N-1}  &   b_{N-1}   &   c_{N-1}   \\
+        0       &   \hdots  &   \vdots  &   0       &   a_{N}     &     b_{N}   \\  
+    \end{bmatrix}
+    \begin{bmatrix}
+        T_{1}^{m+1}         \\
+        T_{2}^{m+1}         \\
+        T_{3}^{m+1}         \\
+        \vdots              \\
+        T_{N-1}^{m+1}       \\
+        T_{N}^{m+1}         \\
+    \end{bmatrix}
+    =
+    \begin{bmatrix}
+        d_{1}               \\
+        d_{2}               \\
+        d_{3}               \\
+        \vdots              \\
+        d_{N-1}             \\
+        d_{N}               \\
+    \end{bmatrix}
+\end{equation}
+
+Equation~\ref{eq:fd_heat_conduction_tridiagonal_matrix} is solved by Gaussian elimination for the
+radial node temperatures. Because the off-diagonal elements are negative and the sum of the diagonal
+elements is greater than the sum of the off-diagonal elements, little roundoff error occurs as a
+result of using Gaussian elimination. When the forward reduction step of Gaussian elimination has
+been applied, the last equation in the transformed equation is:
+
+\begin{equation}
+    \label{eq:fd_heat_conduction_transformed_equation}
+    AT_{N}^{m + 1} + B = q_{N}^{m + 1}
+\end{equation}
+
+Where,
+\ind{   $T_{N}^{m + 1}$    =    Cladding surface temperature \sinum{K}                      }
+\ind{   $q_{N}^{m + 1}$    =    Cladding surface heat flux   \sinum{W/m^{2}} }
+\ind{   $A,B$              =    Coefficients that are defined in Section~\ref{chapter:calculation_cladding_tsurf}}
+
+Equation~\ref{eq:fd_heat_conduction_transformed_equation} is combined with the correlation for
+convective heat transfer to solve for the cladding surface temperature, as previously shown in
+Figure~\ref{fig:fd_geometry_terms}.
+\\
+\\
+The description of the calculations for the temperature distribution in the fuel and cladding is
+complete at this point. The calculation of the temperature of the gas in the fuel rod plenum is then
+needed to complete the solution for the fuel rod temperature distribution. This calculation is
+performed by a separate model and is described in Section~\ref{section:fuel-rod-thermal-response}.

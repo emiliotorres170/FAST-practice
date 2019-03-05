@@ -1,0 +1,21 @@
+%-------------------------------------------------------------------------%
+% Equation 2-51
+%-------------------------------------------------------------------------%
+\begin{equation}
+    \begin{aligned}
+       \varepsilon_{1} = \frac{1}{E}\left( \sigma_{1} - \nu\left( \sigma_{2} + \sigma_{3} \right) \right) + \varepsilon_{1}^{p} + d\varepsilon_{1}^{p} + \int_{}^{}{\alpha_{1}\text{dt}}  \\
+       \varepsilon_{2} = \frac{1}{E}\left( \sigma_{2} - \nu\left( \sigma_{1} + \sigma_{3} \right) \right) + \varepsilon_{2}^{p} + d\varepsilon_{2}^{p} + \int_{}^{}{\alpha_{2}\text{dt}}  \\
+       \varepsilon_{3} = \frac{1}{E}\left( \sigma_{3} - \nu\left( \sigma_{2} + \sigma_{1} \right) \right) + \varepsilon_{3}^{p} + d\varepsilon_{3}^{p} + \int_{}^{}{\alpha_{3}\text{dt}}
+    \end{aligned}
+\end{equation}
+Where
+
+\begin{table}[H]
+    \begin{tabular}[c]{l l l l} \\                                                                                                                           
+        \(\varepsilon_{i}^{p}\) &   \hspace{0.05in}     &   = &     Total plastic strain components at the end of the previous load increment    \\
+
+        \(E\)                   &   \hspace{0.05in}     &   = &     Modulus of elasticity (See MatLib)                                           \\
+
+        \(\nu\)                 &   \hspace{0.05in}     &   = &     Poisson's ratio (See MatLib)                                                 \\
+    \end{tabular}
+\end{table}

@@ -1,0 +1,1125 @@
+\section{Rod Internal Pressure and Fission Gas Release}\label{section:rod-internal-pressure-and-fission-gas-release}
+
+The pressure of the gas in the fuel rod must be known in order to calculate the deformation of the
+cladding and the transfer of heat across the fuel-cladding gap. The pressure is a function of the
+gas temperature, composition, void volume, and quantity of gas. Because the temperature is spatially
+non-uniform, the fuel rod must be divided into several smaller volumes so that the temperature in
+each small volume can be assumed to be uniform. In particular, the fuel rod is divided into a plenum
+volume and several fuel-cladding gap and fuel void volumes. The temperature of each volume is given
+by the thermal models described in Section~\ref{section:fuel-rod-thermal-response}, the size of the
+volume by the deformation models described in Section~\ref{section:fuel-rod-mechanical-response},
+and the quantity of gases by the fission gas release models described later in
+Section~\ref{section:rod-internal-pressure-and-fission-gas-release}.
+\\
+\\
+The internal gas pressure can be calculated either by a static pressure model (which assumes that
+all volumes inside the fuel rod equilibrate in pressure instantaneously) or by a transient pressure
+model which takes into account the viscous flow of the gas in the fuel rod. The static pressure
+model is the default model. The transient model is an input option. Unless the fuel-cladding gap is
+small ($\leq \SInum{25}{\mu m}$), the static and transient models give identical results.
+\\
+\\
+The static fuel rod internal gas pressure model is based on the
+following assumptions:
+
+\begin{enumerate}
+    \item Perfect gas law holds ($PV = NRT$).
+    \item Gas pressure is constant throughout the fuel rod.
+    \item Gas in the fuel cracks is at the average fuel temperature.
+\end{enumerate}
+
+The transient fuel rod internal gas pressure model is based on the
+following assumptions:
+
+\begin{enumerate} \def\labelenumi{\arabic{enumi}.}
+    \item Perfect gas law holds ($PV = NRT$).
+    \item Gas flow past the fuel column is a quasi-steady process.
+    \item Gas flow is compressible and laminar.
+    \item Gas flow past the fuel column can be analyzed as Poiseuille flow (that is, by force balance
+        only).
+    \item Gas expansion in the plenum and ballooning zone is an isothermal process.
+    \item The entire fuel-cladding gap can be represented as one volume containing gas at a uniform
+        pressure.
+    \item The flow distance is equal to the distance from the plenum to the centroid of the
+        fuel-cladding gap.
+    \item The minimum cross-sectional area of flow is equivalent to an annulus with inner radius equal
+        to that of the fuel pellet radius and a radial thickness of $\SInum{25}{\mu m}$.
+\end{enumerate}
+%-------------------------------------------------------------------------%
+% Static Gas Pressure                                                     %
+%-------------------------------------------------------------------------%
+\subsection{Fuel Rod Internal Gas Pressure}
+\subsubsection{Static Gas Pressure}\label{section:static-gas-pressure}
+
+Fuel rod internal gas pressure is calculated from the application of the perfect gas law to a
+multiple volume region. The volumes accounted for in FAST-1.0 include the hot plenum volume, gap,
+annulus, crack, dish, porosity, roughness, and pellet-pellet interface volumes specific to each
+node. Thus, the equation for rod internal pressure is
+
+\begin{equation}
+    \label{eq:rod_internal_pressure}
+    P = \frac{MR}{\frac{V_{p}}{T_{p}} + \sum_{n = 1}^{N}\left\lbrack \frac{V_{g}}{T_{g}} + \frac{V_{ch}}{T_{ch}} + \frac{V_{cr}}{T_{cr}} + \frac{V_{dsh}}{T_{dsh}} + \frac{V_{por}}{T_{por}} + \frac{V_{rfc}}{T_{rfc}} + \frac{V_{i}}{T_{i}} \right\rbrack}
+\end{equation}
+
+Where,
+\ind{    $ P $       =          Rod internal pressure                                                         \sinum{Pa}                   }
+\ind{    $ M $       =          Total \# of moles of gas                                                                             }
+\ind{    $ R $       =          Universal gas constant, \SInum{8.34}{J/mole-K}                                                                }
+\ind{    $ N $       =          Number of axial nodes into which fuel rod is divided for numerical solution                          }
+\ind{    $ n $       =          Axial node number                                                                                    }
+\ind{    $ V $       =          Volume                                                                        \sinum{m^{3}} }
+\ind{    $ T $       =          Temperature                                                                   \sinum{K}                    }
+
+The following void volumes are accounted for in the pressure solution:
+
+\renewcommand{\captiontext}{Void Volumes}
+\begin{longtable}[c]{D{2.0cm}D{4.0cm}D{9.0cm}}
+    \caption{\captiontext} \label{tab:void-volume-pressure-solution} \\   \hline
+        \textbf{Symbol}     & \textbf{Location}     & \textbf{Temperature Description}  \\  \hline
+    \endfirsthead
+    \caption{\captiontext (continued)}  \\   \hline
+        \textbf{Symbol}     & \textbf{Location}     & \textbf{Temperature Description}  \\  \hline
+    \endhead
+        $ p $     &  Plenum                         &  As described in Section~\ref{section:plenum-volume}, dependent on the upper          \\
+                  &                                 &  cladding and fuel temperatures                                               \\
+        $ g $     &  Gap                            &  Average of the fuel surface and cladding ID temperatures                     \\                                               
+        $ ch $    &  Central hole                   &  Nodal fuel centerline temperature                                            \\
+        $ cr $    &  Fuel cracks                    &  Average of fuel surface and temperature at the restructured fuel radius      \\
+        $ dsh $   &  Fuel dish                      &  Fuel volume average temperature                                              \\
+        $ cham $  &  Fuel chamfer                   &                                                                               \\
+        $ por $   &  Fuel open-porosity             &  Fuel volume average temperature                                              \\
+        $ rfc $   &  Fuel \& Clad surface roughness &  Temperature at fuel surface and cladding ID                                  \\
+        $ i $     &  Interface volumes              &  Average between fuel volume average and                                      \\
+\end{longtable}
+
+\notes{Note: In the FAST-1.0 Output file, a table appears that presents the
+fractions of total volume represented by the plenum, gap, cracks,
+dishes, annulus, open porosity, and roughness, and the rod-averaged
+temperatures associated with these various volume-fractions. These are
+not the node-specific values that appear in the above equation, but are
+he results of the sum of each axial node for each volume.} 
+\\
+\\
+The gas pressure calculation, therefore, requires information on the gas
+inventory, void volumes, and the void temperatures, which is provided by
+the following supportive models.
+%-------------------------------------------------------------------------%
+% Transient internal Gas flow
+%-------------------------------------------------------------------------%
+\subsubsection{Transient Internal Gas Flow} \label{section:transient-internal-gas-flow}
+
+Transient flow of gas between the plenum and fuel-cladding gap is
+calculated by the Poiseuille equation for viscous flow along an annulus
+according to Equation~\ref{eq:transient_internal_gas_mass_flow_rate}. Assumptions inherent in the equation 
+are ideal gas, laminar flow, and density based on linear average pressure:
+
+\begin{equation}
+    \label{eq:transient_internal_gas_mass_flow_rate}
+    \dot{m} = \frac{\pi \left( P_{P}^{2} - P_{S}^{2} \right)}{R\mu \sum_{i = I_{s}}^{I_{p}}\frac{l_{i}T_{i}H}{D_{g}{D_{h}}^{3}}}
+\end{equation}
+%\cleardoublepage
+Where,
+\ind{   $ \dot{m} $       =  Mass flow rate                                                               \sinum{g-moles/s}                                                                    }
+\ind{   $ \mu$            =  Gas viscosity at temperature $T_{a} $                                        \sinum{N-s/m^{2}}                                                     }
+\ind{   $ T_{a} $         =  Volume-averaged temperature of gas in gas                                    (fuel-cladding) gap \sinum{K}                                                        }
+\ind{   $ T_{i}$          =  Gas temperature at node $i $                                                 \sinum{K}                                                                            }
+\ind{   $ l_{i}$          =  Axial length of node $i $                                                    \sinum{m}                                                                            }
+\ind{   $ I_{P} $         =  Number of top axial node                                                                                                                                    }
+\ind{   $ I_{s} $         =  Number of axial node closest to centroid of gas gap                          (see Figure~\ref{fig:internal_pressure_distribution_transient_gas_flow_model}) }
+\ind{   $ H $             =  Hagen number                                                                 (see Equation~\ref{eq:hagen_number})                                           }
+\ind{   $ P_{P} $         =  Fuel rod plenum gas pressure                                                 \sinum{N/m^{2}}                                                       }
+\ind{   $ P_{S} $         =  Fuel-cladding gap gas pressure                                               \sinum{N/m^{2}}                                                       }
+\ind{   $ R $             =  Universal gas constant                                                       \sinum{N-m/K-g-moles}                                                                }
+\ind{   $ D_{g} $         =  Mean diameter of fuel-cladding gap                                           \sinum{m}                                                                            }
+\ind{   $ D_{h}$          =   Hydraulic diameter of fuel-cladding gap = 2$t_{\text{gi}} $ for a small gap \sinum{m}                                                                            }
+\ind{   $ t_{gi}$  =  Fuel-cladding radial gap thickness at node $i $                              \sinum{m}                                                                            }
+    
+
+The Hagen number is calculated by:
+
+\begin{equation}
+    \label{eq:hagen_number}
+    H = 22 + \frac{0.24558}{2t_{gi} -\num{7.87E- 4}}
+\end{equation}
+
+Where, 
+    \ind{   \(t_{gi}\) is in \sinum{in}.    }
+
+
+A plot of the relation between Hagen number and gap width given by Equation~\ref{eq:hagen_number} is
+shown in Figure~\ref{fig:hagen_number}.  For gaps smaller than \SInum{25}{\mu m}, the function is
+cut off at value of 1177. To calculate the fuel-cladding gap pressure, a modified form of
+Equation~\ref{eq:rod_internal_pressure} is used. The plenum term is deleted and the moles of gas in
+the fuel-cladding gap is substituted in place of the moles of gas in the fuel rod.
+
+\begin{figure}
+    \includegraphics[height=\figheight\textheight]{../media/image137}
+    \caption{Internal Pressure Distribution with the Transient Gas Flow Model}
+    \label{fig:internal_pressure_distribution_transient_gas_flow_model}
+\end{figure}
+
+\begin{figure}
+ \includegraphics[height=\figheight\textheight]{../media/Hagen_number_vs_gap_thickness}
+ \caption{Hagen Number Versus Width of Fuel-Cladding Gap}
+ \label{fig:hagen_number}
+\end{figure}
+
+\subsection{Fuel Rod Void Volume} \label{section:fuel-rod-void-volume}
+
+Void volumes computed by FAST-1.0 include the plenum, pellet dishes and chamfers, the fuel-cladding
+gap, the fuel cracks, the fuel open porosity, pellet-pellet interface, the fuel and cladding surface
+roughness volumes, and (if it exists) the fuel central hole volume. These void volumes are
+calculated as indicated below.
+
+\subsubsection{Plenum Volume} \label{section:plenum-volume}
+
+The plenum volume is calculated from geometry considerations and irradiation induced effects on both
+the fuel and cladding. In the plenum, the cladding undergoes creep and thermal expansion, while the
+fuel undergoes thermal expansion, swelling and densification. The axial effects of both the fuel and
+cladding deformation are accounted for in determining the reduction (or possibly expansion) of the
+plenum free volume.  In addition, the volume of the hold-down spring is considered, as well as
+changes in the spring geometry due to thermal expansion.
+
+\subsubsection{Pellet Dish and Chamfer Volumes} \label{section:pellet-dish-and-chamfer-volumes}
+
+The volume between pellets is calculated and included as part of the overall volume in the internal
+gas pressure model. The inter-pellet volume is calculated at each time step based on hot-pellet
+geometries.  Figure~\ref{fig:interpellet_void_volume} shows 1) a cold-pellet interface configuration
+for the case where the pellets are dished and 2)~an exaggerated hot-pellet interface configuration.
+The void volume available for internal fill gas is defined by the cross-hatched areas ($a$ and $b$
+in Figure~\ref{fig:interpellet_void_volume}).  The dish volume is that portion of the hot
+inter-pellet volume that is within the dishes, excluding the volume of any central hole. The chamfer
+volume is included in the portion of the hot inter-pellet volume
+that is outside the dishes.
+
+\subsubsection{Fuel-Cladding Gap Volume} \label{section:fuel-cladding-gap-volume}
+
+The fuel-cladding gap volume is calculated by considering the area between two concentric cylinders.
+The outer cylinder is assumed to have a diameter equal to the diameter of the cladding inside
+surface based on plastic deformation. The inside cylinder is assumed to have a diameter equal to the
+diameter of the relocated fuel pellets.
+
+\subsubsection{Fuel Crack Volume} \label{section:fuel-crack-volume}
+
+As the fuel expands, extensive cracking occurs due to the high thermally
+induced stresses, resulting in a relocated fuel surface. The crack
+volume is computed in Equation~\ref{eq:fuel_crack_volume}.
+
+\begin{equation}
+    \label{eq:fuel_crack_volume}
+    V_{c} = V_{g} - V_{eg} - V_{tx}
+\end{equation}
+
+Where,
+\ind{   $ V_{c} $   =  Fuel crack volume per unit length \sinum{m^{2}}                                                         }
+\ind{   $ V_{g} $   =  The volume per unit length within the thermally expanded cladding \sinum{m^{2}}                         }
+\ind{   $ V_{eg} $  =  Fuel volume per unit length defined by expanded radial nodes, including the thermal expansion swelling, and densification \sinum{m^{2}}                                                               }
+\ind{   $ V_{tx} $  =  The computed fuel-cladding gap volume per unit length based on the relocated fuel surface \sinum{m^{2}} }
+
+\subsubsection{Open Porosity Volume} \label{section:open-porosity-volume}
+
+A portion of the initial fabrication porosity is open to free gas flow, which is given by the
+following expressions:
+
+\begin{equation}
+    V_{por} = 
+    \begin{cases}
+        \num{2.77E-4}-3.8181\Gden-\num{1.43E-8}\Gden^{2}+\num{2.497E-10}\Gden^{3}, & \Gden \leq 91.25     \\
+        \num{1.97E-8}\left(94.0-\Gden\right),                                              & 91.25 < \Gden < 94.0 \\
+        0.0 ,                                                                                 & \Gden \geq 94.0
+    \end{cases}
+\end{equation}
+
+Where,
+\ind{   $ V_{por} $  =  Porosity volume per unit length \sinum{m^{2}}           }
+\ind{   $ G_{den}$   =  $DEN - 1.25 $                                                    }
+\ind{   $ DEN $      =  Fuel density                    (\percent of theoretical density) }
+
+\notes{Note: It should be noted that most commercially fabricated fuel today has little open
+porosity.} 
+
+\subsubsection{Pellet-Pellet Interface Volume} \label{section:pellet-pellet-interface-volume}
+
+The pellet-pellet interface volume is calculated as the difference between the hot inter-pellet
+volume and the dish volume.
+
+\subsubsection{Surface Roughness Volume} \label{section:surface-roughness-volume}
+
+The roughness of the surface of the fuel and cladding results in a small void volume accounted for
+by
+
+\begin{equation}
+    \label{eq:surface_roughness_volume}
+    V_{rough} = \frac{\pi\left( {r_{p}}^{2} - \left( r_{p} - rough_{p} \right)^{2} \right) + \pi\left( \left( r_{c} + rough_{c} \right)^{2} - {r_{c}}^{2} \right)}{V/L}
+\end{equation}
+
+Where,
+\ind{   $ V_{rough} $  =  Fraction of pellet volume in roughness                        }
+\ind{   $ r_{p} $      =  Outer radius of pellet                 \sinum{m}                    }
+\ind{   $ r_{c} $      =  Inner radius of cladding               \sinum{m}                    }
+\ind{   $ rough_{p} $  =  Fuel surface roughness                 \sinum{m}                    }
+\ind{   $ rough_{c} $  =  Cladding surface roughness             \sinum{m}                    }
+\ind{   $ V $          =  Volume of pellet stack                 \sinum{m^{3}} }
+\ind{   $ L $          =  Length of fuel stack                   \sinum{m}                    }
+
+The gas pressure response resulting from the above models feeds back into the mechanical and
+temperature response models in the iteration scheme.
+
+\subsubsection{Central Hole Volume} \label{section:central-hole-volume}
+
+The central hole volume is calculated by considering the area of the central hole (if present), the
+length of the axial node, and the length of the central hole.
+
+\subsection{Fission Gas Production} \label{section:fission-gas-production}
+
+Given production rates for the major diffusing gases, the burnup-dependent total fission gas
+generated at axial elevation $ z $ is calculated as
+
+\begin{equation}
+    \label{eq:fission_gas_production_rate}
+    GPT\left( z \right) = \frac{BU\left( z \right)VF\left( z \right)}{100A_{v}}\left( PR_{He} + PR_{Kr} + PR_{Xe} \right)
+\end{equation}
+
+Where,
+\ind{    $ GPT\left( z \right) $  =  Total fission gas produced at Elevation $ z $ \sinum{moles} }
+\ind{    $ BU\left( z \right)$    =  Burnup at elevation $ z $ \sinum{fission/cm^{3}} }
+\ind{    $ VF\left( z \right) $   =  Fuel volume                                   \sinum{cm^{3}}         }
+\ind{    $ A_{v} $                =  Avogadro's number                                                             }
+\ind{    $ PR $                   =  Fission gas production rate                   \sinum{atoms/100-fissions}            }
+
+All the fission gas produced, however, is not released. A portion is trapped in the fuel and a
+portion is released to the fuel-cladding gap volume. Only the released portion is used to calculate
+the rod internal gas pressure. The gas release fraction is calculated as discussed in the following
+sections.
+
+\subsection{Steady-State Gas Release} \label{section:steady-state-gas-release}
+
+Gas release models in FAST-1.0 account for not only fission gas release (krypton, xenon, and helium)
+but also nitrogen release. The nitrogen is released from the fuel lattice, where it is trapped
+during the fuel fabrication process. There are four fission gas release model options: ANS-5.4
+(1982) (\cite{ref:Rausch1979}) ANS-5.4(2011); the modified Forsberg and Massih
+model (\cite{ref:Forsberg1985}), modified at PNNL; and the FRAPFGR model
+developed at PNNL. All four of these release models are based on earlier formulations for diffusion
+from a sphere by \cite{ref:Booth1957} and are discussed below.
+\\
+\\
+The Massih model is recommended and is set as the default model. The ANS-5.4 models are useful for
+calculating the release of short-lived radioactive gas nuclides but are known to provide very
+conservative values for release. The FRAPFGR model is useful for initializing the transient gas
+release model. However, neither the ANS-5.4 model nor the FRAPFGR model predicts stable fission gas
+release as well as the Massih model does, thus it is recommended that the Massih model be used for
+best-estimate calculation of stable fission gas release.
+
+\subsubsection{ANS-5.4 (1982) Gas Release Model} \label{section:ans-5.4-1982-gas-release-model}
+
+The ANS-5.4 (ANS, 1982) fractional fission gas release is calculated as a function of time and
+radial fuel temperature and axial burnup. The fuel is divided into radial and axial nodes according
+to the old 1982 American Nuclear Society (ANS) standard. A user requirement is that the time step
+sizes be such that the burnup increments do not exceed \SInum{2}{GWd/MTU}.
+\\
+\\
+The modeling is divided into two main sections, one for release of stable isotopes and the other for
+release of short-lived isotopes. There are high- and low-temperature models for both the stable and
+radioactive fission products. The release is calculated using both the high-temperature and the
+low-temperature models, and the larger release value is used. Time steps should not exceed 50 days.
+\\
+\\
+The ANS-5.4 fission gas release model (\cite{ref:ANS1982}) is incorporated as specified by the
+standard and will not be described in this document. A revised ANS-5.4 fission gas release model has
+been recently approved as a standard (\cite{ref:ANS2011}). The 1982 model is not currently an
+approved standard and provides a very conservative prediction of release in the FAST-1.0 code, while
+the revised model provides a less conservative prediction even at the 95/95 upper bound. The 1982
+model is retained in FAST-1.0 for compliance with various regulations. The new ANS-5.4 standard
+(\cite{ref:ANS2011}) is also available and is described below.
+
+\subsubsection{ANS-5.4 (2011) Gas Release Model} \label{section:ans-5.4-2011-gas-release-model}
+
+The new ANS-5.4 standard was approved in 2011 and it provides a methodology for determining the
+radioactive releases from fuel rods, and to determine radiological consequences of postulated
+accidents. The model is based on the assumption that no significant power transient will occur, such
+as reactivity insertion accidents (RIAs). This model includes volatile and gaseous fission products
+of primary importance such as krypton, xenon, iodine, and cesium. The largest contributor to the
+equivalent dose to individuals is generally I-131, which is included in the model. The radioactive
+gaseous and volatile fission products are divided into two categories: 
+
+\begin{enumerate}
+    \item Short-lived radioactive nuclides with a half-life $ < \SInum{1}{year}$ 
+    \item Long-lived radioactive nuclides with half-life $ > \SInum{1}{year}$. 
+\end{enumerate}
+
+This distinction is particularly important when considering diffusion processes that proceed slowly
+as compared to the decay time for the nuclides under consideration.  The model presented in the ANS
+5.4 2011 standard is applicable to short lived nuclides; a further distinction is applied in the
+standard for nuclides with a half-life smaller than six hours, and nuclides with half-lives greater
+than six hours but smaller than sixty days.
+\\
+\\
+The first incarnation of the ANS-5.4 standard was first implemented in 1982 and it was originally
+based on the Booth diffusion model. The model coefficients were determined from the measured release
+data for xenon and krypton. Because of the lack of data for I-131, the diffusion coefficient for
+this nuclide was assumed to be a factor of seven higher than the one used for xenon and krypton.
+However, in the last twenty-five years, fuel experiments in test reactors have been performed and
+measured data have been used to validate the standard at higher burnups. Based on this data it was
+also concluded that the prediction for I-131 was overly conservative.
+\\
+\\
+The fission gas release model from ANS 5.4 2011 (\cite{ref:ANS2011}) implements the model described
+in the standard and it calculates the release-to-birth ratio ($R/B$), or the so-called ``gap
+release'' for short-lived and long-lived nuclides, as defined by the standard. The short lived and
+long lived nuclides considered by the model are listed in
+Tables~\ref{tab:short_decay_constants_ans_fgr} and Table~\ref{tab:long_decay_constants_ans_fgr},
+respectively, together with their precursor coefficients and decay constants for radioactive
+nuclides. The nuclides are categorized as short lived if their half-life is less than six hours,
+while they are considered long lived, if their half-life is greater than six hours but less than
+sixty days. It should be noted that Table 1 of (\cite{ref:ANS2011}) does not contain all the
+nuclides mentioned in the text of the document. Due to this issue, it was necessary to obtain the
+complete nuclide list and associated physical parameters from (\cite{ref:Turnbull2010}).
+
+\renewcommand{\captiontext}{Decay Constants and Precursor Coefficients for short lived Noble Gases
+and Iodines with half-life $<\SInum{6}{h}$}
+\begin{longtable}[c]{KA{4.0cm}K}     
+    \caption{\captiontext} \label{tab:short_decay_constants_ans_fgr}    \\ \hline
+        \textbf{Nuclide} & \textbf{Precursor Coef. ($\alpha$)} &             \textbf{Decay Constant} \\ \hline
+    \endfirsthead
+    \caption{\captiontext (continued)}    \\ \hline
+        \textbf{Nuclide} & \textbf{Precursor Coef. ($\alpha$)} &             \textbf{Decay Constant} \\ \hline
+    \endhead
+        \element{Xe}{}-135m          & 23.5                                &             \num{7.55E-4}\\
+        \element{Xe}{}-137           & 1.07                                &             \num{3.02E-3}\\
+        \element{Xe}{}-138           & 1.0                                 &             \num{8.19E-4}\\
+        \element{Xe}{}-139           & 1.0                                 &             \num{1.75E-2}\\
+        \element{Kr}{}-85m           & 1.31                                &             \num{4.30E-5}\\
+        \element{Kr}{}-87            & 1.25                                &             \num{1.52E-4}\\
+        \element{Kr}{}-88            & 1.03                                &             \num{6.78E-5}\\
+        \element{Kr}{}-89            & 1.21                                &             \num{3.35E-3}\\
+        \element{Kr}{}-90            & 1.11                                &             \num{2.15E-2}\\
+        \element{I}{}-132            & 137                                 &             \num{8.44E-5}\\
+        \element{I}{}-134            & 4.4                                 &             \num{2.20E-4}\\ 
+\end{longtable}
+
+\renewcommand{\captiontext}{Decay Constants and Precursor Coefficients for long lived Noble Gases and Iodines with $ \SInum{6}{h} < \text{half-life} < \SInum{60}{days}$}
+\begin{longtable}[c]{K A{4.0cm} K}     
+    \caption{\captiontext}    \label{tab:long_decay_constants_ans_fgr}    \\ \hline
+            \textbf{Nuclide} & \textbf{Precursor Coef. ($\alpha$)} &             \textbf{Decay Constant} \\ \hline
+    \endfirsthead
+    \caption{\captiontext (continued)}   \\ \hline
+            \textbf{Nuclide} & \textbf{Precursor Coef. ($\alpha$)} &             \textbf{Decay Constant} \\ \hline
+    \endhead
+        \element{Xe}{}-133       & 1.25                                &             \num{1.53E-6}\\
+        \element{Xe}{}-135       & 1.85                                &             \num{2.21E-5}\\
+        \element{I}{}-131        & 1.0                                 &             \num{9.98E-7}\\
+        \element{I}{}-133        & 1.21                                &             \num{9.26E-6}\\ 
+\end{longtable}
+
+\notes{Note: that ANS-2011 FGR model requires at least 11 axial meshes in order to accurately
+predict the fission gas release.}
+
+\subsubsection{Modified Forsberg-Massih Model} \label{section:modified-forsberg-massih-model}
+
+The original Forsberg-Massih model begins with a solution of the gas
+diffusion equation for constant production and properties in a spherical
+grain:
+
+\begin{equation}
+    \label{eq:gas_diffusion_forsberg_massih}
+    \frac{dC}{dt} = D\left( t \right)\Delta_{r}C\left( r,t \right) + \beta\left( t \right)
+\end{equation}
+
+{\color{red}If $C$ is a $func(r,t)$ should these be partial derivatives ?}
+
+Where,
+\ind{   $ C $              =      Gas concentration                                                   }
+\ind{   $ \beta $          =      Gas production                                                      }
+\ind{   $\Delta_{r}$       =      \(\frac{d^{2}}{dr^{2}} + \frac{2}{r}\left( \frac{d}{dr} \right)\)   }
+\ind{   $ D $              =      Diffusion constant                                                  }
+\ind{   $ t $              =      Time                                                                }
+
+With boundary conditions,
+\ind{   $C\left( r,0 \right)$    =      0  }
+\ind{   $C\left( a,t \right)$    =      0  }
+
+Forsberg and Massih attempt to solve the equation for the case where there is re-solution of gas on
+the grain surface, which changes the outer boundary condition to
+
+\begin{equation}
+    \label{eq:forsberg_massih_outer_bc}
+    C\left( a,t \right) = \frac{b\left( t \right)\lambda N\left( t \right)}{2D}
+\end{equation}
+
+
+Where,
+        
+\ind{   \(N\)         =  Surface gas concentration }
+\ind{   \(\lambda\)   =  Resolution layer depth    }
+\ind{   \(a\)         =  Hypothetical grain radius }
+\ind{   \(b\)         =  Resolution rate           }
+
+They make use of a four-term approximation to the integration kernel,
+\(K\), where
+
+\begin{equation}
+    \label{eq:forsberg_massih_integration_kernal}
+    \int_{0}^{a}{4\pi r^{2}C\left( r,t \right)dr} = \int_{0}^{\tau}{K\left( \tau - \tau_{0} \right)\beta_{e}\left( \tau_{0} \right){d\tau_{0}}}
+\end{equation}
+
+\begin{equation}
+    \label{eq:forsberg_massih_beta}
+    \beta_{e} = \frac{\beta}{D}
+\end{equation}
+
+\begin{equation}
+    \label{eq:forsberg_massih_tau}
+    \tau = Dt
+\end{equation}
+
+\begin{equation}
+    \label{eq:forsberg_massih_K}
+    K = \frac{8a^{3}}{\pi}\sum_{n = 1}^{\infty}\frac{e^{\left( \frac{- n^{2}\pi^{2}\tau}{a^{2}} \right)}}{n^{2}}
+\end{equation}
+
+\subsubsection{Low-Temperature Fission Gas Release Model at High Burnup}\label{section:low-temperature-fission-gas-release-model-at-high-burnup}
+
+The modified Forsberg-Massih model is used to calculate fission gas release unless the
+low-temperature fission gas release model predicts a higher value for fission gas release. The
+low-temperature fission gas release model is defined as
+
+\begin{equation}
+    \label{eq:forsberg_massih_low_temp_fgr}
+    F = \num{7E- 5}BU + C
+\end{equation}
+
+Where,
+\ind{   \(F\)   =  Fission gas release fraction }
+\ind{   \(BU\)  =  Local burnup in \sinum{GWd/MTU}      }
+
+and
+
+$$
+    C = \begin{cases}
+            0,                     & BU \leq \SInum{40}{GWd/MTU}  \\
+            0.01 \frac{BU-40}{10}, & BU>\SInum{40}{GWd/MTU} \text{ and } F\leq 0.05
+        \end{cases}
+$$
+
+\subsubsection{Grain Boundary Accumulation and Re-Solution}\label{section:grain-boundary-accumulation-and-re-solution}
+
+The final solution for a given time step, without re-solution and with constant production rate
+during the step, can be written as
+
+\begin{equation}
+    \label{eq:forsberg_massih_delta_G_n}
+    \Delta G_{n} = f_{n}G_{n}\left(\tau_{1}\right) + A_{n}\int_{\tau_1}^{\tau_2}e^{\frac{-B_{n}\left(\tau_2-\tau_0\right)}{a^2}}q\left(\tau_{0}\right)d\tau_0
+\end{equation}
+
+\begin{equation}
+    \label{eq:forsberg_massih_delta_G}
+    \Delta G = \sum_{n = 1}^{4} \Delta G_n
+\end{equation}
+
+Where,
+\ind{    \(\mathrm{\Delta}G\) = change in gas concentration in fuel grain }
+
+\begin{equation}
+    \label{eq:forsberg_massih_G_b}
+    \mathrm{\Delta}G_{B} = \sum_{}^{}{f_{n}G_{n}\left( \tau_{1} \right)} + A_{n}\int_{\tau_{1}}^{\tau_{2}}{\text{funct}\left( \tau_{2} - \tau_{0} \right)q\left( \tau_{0} \right){d\tau_{0}}}
+\end{equation}
+
+Where,
+\ind{   \(\mathrm{\Delta}G_{B}\) = change in gas concentration on grain boundaries}
+
+\begin{equation}
+    \label{eq:forsberg_massih_f_n}
+    f_{n} = e^{\left\lbrack \frac{- B_{n}\left( \tau_{2} - \tau_{0} \right)}{a^{2}} \right\rbrack} - 1
+\end{equation}
+
+\ind{   \(f_{n}\) = fission gas production fraction remaining in the grain from the previous time
+        step.}
+
+Where \(q\) is determined from
+
+\begin{equation}
+    \label{eq:forsberg_massih_q}
+    a^{2}q\left\lbrack - \sum_{n = 1}^{4}\left( \frac{f_{n}A_{n}}{B_{n}} \right) + func\left( \Delta\tau \right) \right\rbrack = \beta\Delta t
+\end{equation}
+
+With the following relationship:
+
+\begin{equation}
+    \label{eq:forsberg_massih_funct}
+    func\left( \Delta \tau \right) = \int_{\tau_{1}}^{\tau_{2}}funct\left(\tau_2 - \tau_0\right) d \tau = 
+    \begin{cases}
+        \frac{6}{\sqrt{\pi}}\sqrt{\frac{\tau_2-\tau_0}{a^{2}}}-3\frac{\tau_2-\tau_0}{a^2}, & \; \tau < 0.1 \\
+        1-\frac{6}{\pi^2}e^{-\pi^2\frac{\left(\tau_2-\tau_0\right)}{a^2}},                 & \; \tau \geq 0.1
+    \end{cases}
+\end{equation}
+
+Where,
+\ind{   \(A_{n}\),\(\ B_{n}\) = Constants given by Massih}
+\ind{   \(K_{2} = \frac{a}{3} - \frac{K}{4\pi a^{2}}\)}
+\ind{   \(K_{3} = \frac{3}{a}K_{2}\)}
+\ind{   \(1 + K_{3} = \sum_{n = 1}^{4}{A_{n}e^{\left( - \frac{B_{n}\tau}{a^{2}} \right)}}\)}
+
+In modifying the original model, it was chosen to introduce
+re-solutioning by defining the partition of the gas arriving at the
+boundary each time step as follows:
+\begin{equation}
+    \Delta \text{Resolved Gas} = \Delta G_{B}  \frac{F}{1+F}
+\end{equation}
+
+\begin{equation}
+    \Delta G_{B} =\frac{ \Delta G_{B} }{1+F}
+\end{equation}
+
+With the factor, \(F\), defined as
+
+\begin{equation}
+    F = M\left\lbrack \frac{\num{1.84E-14}r_{\text{grn}}}{3D} \right\rbrack
+\end{equation}
+
+Where,
+\ind{   \(M\)           =    An empirical multiplier on the term in brackets that is the original Massih equation for the resolution rate                                            (\(M = 300\))            }
+\ind{   \(r_{grn}\)     =    Grain radius \sinum{m} }
+\ind{   \(D\)           =    Diffusion constant \sinum{m^{2}/s} }
+\notes{NOTE: Although \(F\) is unitless in Massih's derivation, it does not
+represent the fraction of retained gas.}
+
+\subsubsection{Diffusion Constant}\label{section:diffusion-constant}
+
+The diffusion constant (\(D\)) in the original Forsberg-Massih model is
+defined over three temperature ranges, as follows:
+
+\begin{equation}
+    \label{eq:massih_diffusion_constant}
+    D = 
+    \begin{cases}
+        \num{1.51E-17}\exp\left(\frac{- 9508}{T}\right),          & T < \SInum{1381}{K}               \\
+        \num{2.14E-13}\exp\left(\frac{- 22884}{T}\right),         & \SInum{1381}{K} \leq T \leq \SInum{1650}{K} \\
+        \num{1.09E-17}\exp\left(\frac{- 6614}{min(T,1850)}\right), & T > \SInum{1650}{K}              \\
+    \end{cases}
+\end{equation}
+
+In principle, typically only the mid-range diffusion constant from
+Equation~\ref{eq:massih_diffusion_constant} is generally used. The activation energy term
+(\(\frac{Q}{R} = 22884 (1.15)\)). If the modified constant is less than the low-range Massih
+diffusion constant, the latter is used.
+\\
+\\
+A burnup enhancement factor multiplies the mid-range diffusion constant and has the form shown in
+Equation~\ref{eq:massih_midrange_enhancement_factor}
+\begin{equation}
+    \label{eq:massih_midrange_enhancement_factor}
+    \text{burnup factor} = 100^{\left( \frac{BU - 21}{40} \right)}
+\end{equation}
+
+Where
+\ind{   \(BU\)  =  burnup, \sinum{GWd/MTU}}
+
+The enhancement factor has a maximum value of 20,000. A factor of 12 is applied to the
+burnup-enhanced diffusion constant as a final step.
+
+\subsubsection{Gas Release}\label{gas-release}
+
+The gas is accumulated at the grain boundary until a saturation concentration is achieved, at which
+time the grain boundary gas is released. The saturation area density of gas is given by
+
+\begin{equation}
+    \label{eq:massih_gas_saturation_density}
+    N_{s} = \left\lbrack \frac{4rF\left( \theta \right)V_{c}}{3K_{B}T\sin^{2}\left( \theta \right)} \right\rbrack\left( \frac{2\gamma}{r} + P_{ext} \right)
+\end{equation}
+
+Where,
+\ind{   $N_{s}$    =  Saturation concentration                    \sinum{atoms/m^{2}} }
+\ind{   $\theta$   =  Dihedral half-angle = 50$^{\circ}$                                       }
+\ind{   $K_{B}$    =  Boltzman constant                                                        }
+\ind{   $\gamma$   =  Surface tension = 0.6                       \sinum{J/m^{2}}     }
+\ind{   $V_{c}$    =  Critical area coverage fraction = 0.25                                   }
+\ind{   $r$        =  Bubble radius = 0.5                         \sinum{\mu m}                     }
+\ind{   $P_{ext}$  =  External pressure on bubbles = gas pressure \sinum{Pa}                         }
+
+And
+
+\begin{equation}
+    \label{eq:massih_F_theta_gas_release}
+    F\left( \theta \right) = 1 - 1.5\cos\left( \theta \right) + 0.5\cos^{3}\left( \theta \right)\
+\end{equation}
+
+The final modification to the original model was to release both the grain boundary and the
+re-solved gas whenever the saturation condition is achieved and the grain boundary gas is released.
+\\
+\\
+To summarize, optimized parameters have been applied based on comparisons to selected steady-state
+and transient data:
+
+\begin{itemize}
+    \item The activation energy \(\frac{Q}{R} = 1.15(22884) = 29060 \) (High temperature diffusion).
+    \item The resolution parameter $= 300\left(\num{1.84E-14}\right) = \num{1.47E-12}$.
+    \item Burnup enhancement factor on diffusion constant $= 100(BU-21)/40$.
+    \item Multiplier on the diffusion constant = 12.0 (applied after all other modifications).
+\end{itemize}
+
+\subsubsection{FRAPFGR Model}\label{frapfgr-model}
+
+The FRAPFGR model has been developed at PNNL to initialize the transient release model in FRAPTRAN
+that is used to calculate fission gas release during fast transients such as a reactivity initiated
+accident. Because of this, it is important that the FRAPFGR model predict not only the steady state
+gas release, but also the amount of gas that remains within the grains and the amount of gas that is
+currently residing on the grain boundaries for each axial and radial node. The grain boundary gas is
+released during a fast transient due to cracking along the grain boundaries. To do this, gas release
+data as well as electron probe microanalysis (EPMA) and X-ray fluorescence (XRF) data have been used
+to validate that the model can accurately predict these parameters.
+\\
+\\
+The basic layout of the FRAPFGR model is similar to the modified Massih model with the following
+differences.
+
+\subsubsection{Grain Growth Model}\label{grain-growth-model}
+
+The FRAPFGR model accepts an input grain size that can be specified in the input. The default value
+for this is \SInum{10}{\mu m} using the mean linear intercept (MLI) method. The FRAPFGR model
+uses a grain growth model proposed by \cite{ref:Khorushii1999} given by
+
+\begin{equation}
+    \label{eq:FRAPFGR_grain_growth}
+    \frac{da}{dt} = K\left( \frac{1}{a} - \frac{1}{a_{\max}} - \frac{1}{a_{ir}} \right)
+\end{equation}
+
+Where
+\ind{   \(\frac{da}{dt}\)  =  Grain radius growth rate                                                                 \sinum{\mu-m/hour} }
+\ind{   $K$            =  $\num{5.24E7}\exp\l\exp\left((\frac{- 32100}{T}\right)$                                                                     }
+\ind{   \(T\)          =  Temperature                                                                              \sinum{K}           }
+\ind{   \(a\)          =  Grain size                                                                               \sinum{\mu m}      }
+\ind{   $a_{max}$      =  $\num{2.23E3}\left(\frac{- 7620}{T}\right)$                                                                      }
+\ind{   $a_{ir}$       =  $\left[ \frac{50}{\dot{F}} \times \frac{1400}{T} \right] 326.5\exp\left(\frac{- 5620}{T}\right)$                     }
+\ind{   \(\dot{F}\)    =  Fission rate \sinum{MW/tU}       }
+
+Equation~\ref{eq:FRAPFGR_grain_growth} is solved by dividing the current time step into \SInum{1}{hour}
+time steps and solving assuming constant rates within each sub-step.
+
+\subsubsection{High Burnup Rim Thickness and Porosity}\label{high-burnup-rim-thickness-and-porosity}
+
+The high burnup rim that is observed in the outer edge of high burnup pellets can be characterized
+in terms of sub-micron grains and high porosity. These two items are modeled in the FRAPFGR model.
+The size of the high burnup rim has been measured by optical microscopy (\cite{ref:Manzel2002}) and
+is modeled using the equation
+
+\begin{equation}
+    \label{eq:high_burnup_rim_thickness}
+    t_{rim} = \num{1.439E-6}BU^{4.427}
+\end{equation}
+
+Where,
+\ind{   \(t_{rim}\)  =  Thickness of high burnup rim \sinum{\mu m} }
+\ind{   \(BU\)       =  Pellet average burnup \sinum{GWd/MTU}       }
+
+Figure~\ref{fig:hbu_rim_model} shows how the high burnup structure is modeled in FRAPFGR.  The
+calculated value of \(t_{rim}\) sets a thickness on the pellet surface that is entirely restructured
+grains. The grain size (MLI) for these grains is set at \SInum{0.15}{\mu m}. The next region, which has a
+width also set by \(t_{rim}\), is composed of a mixture of restructured grains and non-restructured
+grains. The fraction of restructured grains decreases linearly to zero across this thickness of this
+region. If the temperature in a given axial node is greater than \SInum{1000}{\mDC} then no
+restructured grains are assumed to form.
+
+\begin{figure}
+    \includegraphics[height=\figheight\textheight]{../media/hbu_rim_model}
+    \caption{Modeling of the Pellet High Burnup Rim Structure}
+    \label{fig:hbu_rim_model}
+\end{figure}
+
+In addition to the restructured grains, there is also a porosity increase within the high burnup
+rim. The porosity is modeled based on a fit to observations on high burnup fuel
+(\cite{ref:Spino1996}; \cite{ref:Une2001}; and \cite{ref:Manzel2000}). This model is given by
+
+\begin{equation}
+    P = \begin{cases}
+        0                                          &  BU_{local} < \SInum{57}{GWd/MTU}  \\
+        11.283 \ln \left( BU_{local}\right)-45.621 & BU_{local} \geq \SInum{57}{GWd/MTU}
+    \end{cases}
+\end{equation}
+
+Where,
+\ind{   \(P\)           =  Porosity increase in HBU rim structure (fraction of fuel theoretical density)  }
+\ind{   \(BU_{local}\)  =  Local radial node burnup, \sinum{GWd/MTU}                                              }
+
+This porosity is subtracted off the input theoretical density, which is used to calculate the
+production in each radial node. Therefore, as the porosity in the rim increases, the power
+production in the outer radial nodes is slightly decreased due to increase porosity.
+
+\subsubsection{Diffusion Constant}\label{diffusion-constant-1}
+
+The diffusion constant used in FRAPFGR is given by Equation~\ref{eq:FRAPFGR_diffusion_constant}.
+
+\begin{equation}
+    \label{eq:FRAPFGR_diffusion_constant}
+    D \left( T \right) =
+    \begin{cases}
+        \num{1.51E- 17}\exp\left(- \frac{9508}{max(T,675)}\right)   & T < \SInum{1381}{K}                   \\
+        \num{2.14E- 13}\exp\left(- \frac{22884}{T}\right)           & \SInum{1381}{K} \leq T < \SInum{1650}{K} \\
+        \num{7.14433E- 10}\exp\left(-\frac{34879}{min(T,1850)}\right)    & \SInum{1650}{K} \leq T
+    \end{cases}
+\end{equation}
+
+Where,
+\ind{     \(D\)  =  Diffusion constant \sinum{m^{2}/s} }
+\ind{     \(T\)  =  Temperature \sinum{K}               }
+
+For non-restructured grains, Equation~\ref{eq:FRAPFGR_diffusion_constant_nonrestructured_grains} is used, up to a maximum
+adjustment of 49.81. For restructure grains, there is no burnup
+adjustment.
+
+\begin{equation}
+    \label{eq:FRAPFGR_diffusion_constant_nonrestructured_grains}
+    D\left( T,BU \right) = D\left( T \right)\left(1 \times 10^{\frac{max\left( (BU - 21,)0 \right)}{40}} + 10 \times \frac{min\left( BU,12 \right)}{12} \right)
+\end{equation}
+
+Where,
+
+\ind{   \(D\left( T,BU \right)\)  =  Diffusion constant adjusted for burnup \sinum{m^2/s}                                                         }
+\ind{   \(D\left( T \right)\)     =  Temperature dependent diffusion constant given by Equation~\ref{eq:FRAPFGR_diffusion_constant} \sinum{m^2/s} }
+\ind{   $BU$                      =  Local radial node burnup \sinum{GWd/MTU}                                                                         }
+
+The diffusion constant is also modified for the effects of low power using an error function as
+shown in Equation~\ref{eq:FRAPFGR_diffusion_constant_low_power}.
+
+\begin{equation}
+    \label{eq:FRAPFGR_diffusion_constant_low_power}
+    D\left( T,BU,Power \right) = \frac{D\left( T,BU \right)}{2.5 - 1.5erf\left( Power - 3 \right)}
+\end{equation}
+
+Where,
+\ind{    \(D\left( T,BU,Power \right)\)  =  Diffusion constant adjusted for burnup and power \sinum{m^{2}/s}                                                                   }
+\ind{    \(D\left( T,BU \right)\)        =  Diffusion constant adjusted for burnup given by Equation~\ref{eq:FRAPFGR_diffusion_constant_nonrestructured_grains} \sinum{m^{2}/s} }
+\ind{    \(Power\)                       =  Local radial node power \sinum{kW/ft}                                                                                                 }
+
+\subsubsection{Gas Release}\label{section:gas-release-1}
+
+Gas release calculations are performed separately for restructured grains and non-restructured
+grains. For those nodes that contain both restructured and non-restructured grains, the releases
+from each are combined based on the relative amount of each type of grain.
+\\
+\\
+For the restructured grains, it is assumed that, because the grains are so small, all the gas
+produced in the grain will diffuse out to the grain boundary. Therefore, the only gas that will
+remain in these grains at the end of the time step is the gas that is re-solved back into the
+grains.
+\\
+\\
+The gas re-solved back into the grain is given by the resolution factor from Massih
+(\cite{ref:Forsberg1985a}) . The gas that is in the grain for a given time step, \(i\), is given by
+
+\begin{equation}
+    \label{eq:FRAPFGR_gas_in_grain}
+    GG_{i} = GB_{i - 1}\frac{f}{1 + f}
+\end{equation}
+
+Where,
+\ind{   \(GG_{i}\)  =  Gas in grains \sinum{moles/m^{3}}           }
+\ind{   \(GB_{i}\)  =  Gas on grain boundaries \sinum{moles/m^{3}} }
+
+\begin{equation}
+    \label{eq:FRAPFGR_f}
+    f = \frac{\num{1.84E-14}a}{3D}
+\end{equation}
+
+Where,
+\ind{   \(a\)  =  Grain radius       \SInum{0.075E-6}{m} (for restructured grains) }
+\ind{   \(D\)  =  Diffusion constant \sinum{m^{2}/s}                                     }
+
+For the non-restructured grains, the same formulas as those in Massih are used to calculate
+diffusion from the grains except that the release is reduced to account for resolution during the
+calculation of release.  The following terms are changed as follows:
+\\
+\\
+From Equation~\ref{eq:forsberg_massih_G_b}, the following term is changed:
+
+\begin{equation}
+    \label{eq:FRAPFGR_mod_G_b}
+    \sum_{}^{}{f_{n}G_{n}\left( \tau_{1} \right)} \rightarrow \frac{\sum_{}^{}{f_{n}G_{n}\left( \tau_{1} \right)}}{resolterm}
+\end{equation}
+
+From Equation~\ref{eq:forsberg_massih_q}, the following term is changed:
+
+\begin{equation}
+    \label{eq:FRAPFGR_mod_q}
+    \left\lbrack - \sum_{n = 1}^{4}\left( \frac{f_{n}A_{n}}{B_{n}} \right) + funct\left( \mathrm{\Delta}\tau \right) \right\rbrack \rightarrow \frac{\left\lbrack - \sum_{n = 1}^{4}\left( \frac{f_{n}A_{n}}{B_{n}} \right) + funct\left( \mathrm{\Delta}\tau \right) \right\rbrack}{resolterm}
+\end{equation}
+
+Where,
+\ind{   \(T\)  =  Temperature \sinum{K} }
+
+and
+
+\begin{equation}
+    \label{eq:FRAPFGR_resolterm}
+    resolterm   = max 
+        \begin{cases}
+            0.14009 e^{0.00282T} & T < \SInum{1528.77}{K}    \\
+            22.976-0.0082T       & T \leq \SInum{1528.77}{K}
+        \end{cases}
+\end{equation}
+
+In order for gas to be released from the grain boundaries, the saturation concentration must be
+reached. The saturation concentration is given by
+
+\begin{equation}
+    \label{eq:FRAPFGR_saturation_concentration}
+    g_{s} = \frac{3N_{s}}{2a}
+\end{equation}
+
+Where,
+
+\ind{   \(g_{s}\)  =  Grain boundary saturation concentration                                          \sinum{moles/m^{3}} }
+\ind{   \(N_{s}\)  =  Saturation area density given in Equation~\ref{eq:massih_gas_saturation_density} \sinum{moles/m^{2}} }
+\ind{   \(a\)      =  Grain radius \sinum{m}             }
+
+When the grain boundary gas concentration for a given radial node exceeds the saturation value for
+the first time, all the gas on the grain boundary except 65\percent of the saturation value is
+released.  From then on for that radial node, any gas above 65\percent of the saturation values is
+released.
+\\
+\\
+As discussed, for radial nodes that contain some restructured grains and some non-restructured
+grains, the released gas is calculated as
+
+\begin{equation}
+    \label{eq:FRAPFGR_released_gas}
+    {\Delta rel}_{tot} = {\Delta rel}_{1}\left( restructure^{2} \right) + {\Delta rel}_{2}\left( 1 - restructure^{2} \right)
+\end{equation}
+
+Where,
+\ind{   \({\Delta rel}_{tot}\)  =  Total release from a radial node                       \sinum{moles/m^{3}} }
+\ind{   \({\Delta rel}_{1}\)    =  Release from restructured grains in a radial node      \sinum{moles/m^{3}} }
+\ind{   \({\Delta rel}_{2}\)    =  Release from non- restructured grains in a radial node \sinum{moles/m^{3}} }
+\ind{   \(restructure\)         =  Fraction of restructured grains in radial node                         }
+
+As with the MASSIH model, an athermal release term of 1\percent for every \SInum{10}{GWd/MTU} beyond
+\SInum{40}{GWd/MTU} is added on if the predicted release is less than 5\percent to account for the
+observed gas release from rods with very low power at high burnup.
+
+\subsection{Transient Gas Release} \label{section:transient-gas-release}
+
+The transient release of fission gas is highly dependent on the location of the gas in the fuel
+pellet, both radially, and in each radial node the location (in the grains versus on the grain
+boundaries) of the gas.  Because of this, the transient gas release model in FAST-1.0 may only be
+used if initialized with the {FRAPFGR} model.  This model has been developed specifically to predict
+the location of fission gas within the pellets. This transient release model is a burst release (not
+diffusion release) model as described below:
+
+\begin{itemize}
+
+    \item All grain boundary gas for a given radial node is released when the temperature exceeds
+        \SInum{2000}{\mDF} (\SInum{1093}{\mDC}).
+
+    \item All gas in the restructured grains (matrix) of the high burnup structure for a given radial
+        node is released when the temperature exceeds \SInum{3300}{\mDF} (\SInum{1816}{\mDC}).
+
+    \item 5\percent of the gas in the un-restructured grains (matrix) for a given radial node is
+        released when the temperature exceeds \SInum{3300}{\mDF} (\SInum{1816}{\mDC}).
+
+\end{itemize}
+
+This release model was developed to predict the measured release data from RIA experimental tests in
+CABRI and NSRR. (See data comparisons in \colorbox{yellow}{Geelhood and Luscher (2014b)}.)
+
+{\color{red}Need to add Geelhood and Luscher 2014b to the references}
+
+\subsection{Nitrogen Release} \label{section:nitrogen-release}
+
+The release of nitrogen initially present in fuel material from fabrication occurs as a result of a
+diffusion transport mechanism.  The release of nitrogen affects the rod internal pressure and the
+gas conductivity. The model proposed by \cite{Booth1957} is used, given the following
+assumptions:
+
+\begin{itemize}
+
+    \item The initial concentration of diffusing substance, $C$, is uniform throughout a sphere of
+        radius, $a$.
+    \item Transport of material does not occur from the external phase (gaseous nitrogen) back into
+        the initial carrier medium.
+
+\end{itemize}
+
+The governing equation is
+
+\begin{equation}
+    \label{eq:nitrogen_release}
+    r\frac{\partial C}{\partial t} = D\left( \frac{\partial^{2}}{\partial r^{2}}\left( C r \right) \right)
+\end{equation}
+
+Where,
+\ind{    \(r\)  =  Radial location                        \sinum{m}         }
+\ind{    \(C\)  =  Concentration of diffusing substance               }
+\ind{    \(t\)  =  Time                                   \sinum{s}         }
+\ind{    \(D\)  =  Diffusion coefficient                  \sinum{m^{2}/s} }
+
+With the following boundary conditions:
+\begin{equation}
+    \label{eq:nitrogen_release_bcs}
+    C = \begin{cases}
+        0  & \text{at $r = a$} \\
+        C  & \text{at $t = 0$}
+    \end{cases}
+\end{equation}
+
+By applying a series solution method, the fractional release of the diffusing substance (nitrogen)
+can be approximated based on the value of
+\(B\):
+
+\begin{equation}
+    \label{eq:nitrogen_release_b}
+    B = \pi^{2}\frac{D_{N_{2}}}{a^{2}}t
+\end{equation}
+
+Where,
+\ind{    \(\frac{D_{N_{2}}}{a^{2}}\)  =  Temperature-dependent diffusion coefficient for nitrogen divided by the effective diffusion radius squared \sinum{1/s} }
+\ind{     \(t\)                       =  Time from the start of diffusion                                      \sinum{s}        }
+
+The fraction of nitrogen released (\(F_{N_{2}}\)) as of time (\(t\)) is shown in
+Equation~\ref{eq:nitrogen_release_fraction} equals
+
+\begin{equation}
+    \label{eq:nitrogen_release_fraction}
+    F_{N_{2}} = \begin{cases}
+                6\sqrt{\left[ \frac{D_{N_{2}}}{a^{2}}\frac{t}{\pi} \right]} - 3\frac{D_{N_{2}}}{a^{2}}t & B \leq 1  \\
+                1 - \frac{6e^{- B}}{\pi^{2}}                                                            & B > 1
+    \end{cases}
+\end{equation}
+
+From the experimental data of \cite{ref:Ferrari1963} and \cite{ref:Ferrari1964}
+
+\begin{equation}
+    \label{eq:nitrogen_release_d_a}
+    \frac{D_{N_{2}}}{a^{2}} = 1.73\exp\left( \frac{33400}{1.9869T} \right)
+\end{equation}
+
+Where,
+\ind{    \(T\)  = Temperature \sinum{K} }
+
+\subsection{Helium Production and Release} \label{section:helium-production-and-release}
+
+\subsubsection{Steady-state Production}\label{section:steady-state-production}
+
+Helium is produced at different rates in \element{UO}{2} and MOX.  The release of helium affects the
+rod internal pressure and the gas conductivity.
+\\
+\\
+For \element{UO}{2}, helium production is given by
+
+\begin{equation}
+    \label{eq:he_prod_uo2}
+    \text{He}_{\text{prod}} = \num{1.297E-18}Q\times t\times SA\times PR
+\end{equation}
+
+Where,
+\ind{   $\text{He}_{\text{prod}}$  =  Helium produced for a given axial node \sinum{moles}              }
+\ind{   $Q$                        =  Surface heat flux                      \sinum{W/m^2}          }
+\ind{   $t$                        =  Time                                   \sinum{s}                  }
+\ind{   $SA$                       =  Axial node surface area                \sinum{m^2}            }
+\ind{   $PR$                       =  Fission gas production rate            \sinum{atoms/100-fissions} }
+
+For MOX, a formula has been developed as a function of \element{Pu}{} concentration
+(\element{Pu}{}) and burnup (\(BU\), in \sinum{GWd/MTU}):
+
+\begin{equation}
+    \label{eq:he_prod_mox}
+    \text{He}_{\text{prod}} = \left( A_{1}\melement{Pu}{} + A_{2} \right)BU^{2} + \left( B_{1}\melement{Pu}{} + B_{2} \right)BU
+\end{equation}
+
+Table~\ref{tab:fitting_parameters_helium_mox} shows the fitting parameters that should be used for
+reactor-grade plutonium and weapons-grade plutonium.
+
+\renewcommand{\captiontext}{Fitting Parameters for Helium in MOX}
+
+\begin{longtable}[c]{A{2.0cm}A{4.0cm}A{4.0cm}}
+    \caption{\captiontext}  \label{tab:fitting_parameters_helium_mox}   \\  \hline
+        \textbf{Parameter}              & \textbf{Reactor-Grade Plutonium}   & \textbf{Weapons-Grade Plutonium}       \\ \hline    
+    \endfirsthead
+    \caption{\captiontext (continued)}  \\  \hline
+        \textbf{Parameter}              & \textbf{Reactor-Grade Plutonium}   & \textbf{Weapons-Grade Plutonium}       \\ \hline    
+    \endhead
+            $A_{1}$         & $\num{1.5350E-4}$      & $-\num{2.4360E-4}$       \\
+            $A_{2}$         & $\num{2.1490E-3}$    & $\num{3.6059E-3}$        \\
+            $B_{1}$         & $-\num{2.9080E-3}$   & $\num{3.3790E-3}$        \\
+            $B_{2}$         & $\num{9.7223E-2}$    & $\num{5.3658E-2}$        \\
+\end{longtable}
+
+The above equations calculate the amount of helium produced as a function of time. In order to
+calculate the helium released to the void volume, an approach similar to the approach for nitrogen
+release is used. By applying a series solution method, the fractional release of the diffusing
+substance (helium) can be approximated based on the value of \(B\):
+
+\begin{equation}
+    \label{eq:helium_release_b}
+    B = \pi^{2}\frac{D_{\text{He}}}{a^{2}}t
+\end{equation}
+
+Where,
+\ind{   \(\frac{D_{\text{He}}}{a^{2}}\)  =  Temperature dependent diffusion coefficient for helium divided by the effective diffusion radius squared \sinum{1/s} }
+\ind{   \(t\)                            =  Time from the start of diffusion \sinum{s}                         }
+
+If \(t \leq \frac{1}{\pi^{2}\frac{D_{\text{He}}}{a^{2}}}\) then the fraction of helium released,
+\(F_{\text{He}}\), as of time, \(t\), equals
+
+\begin{equation}
+    \label{eq:he_release_fraction_1}
+    F_{\text{He}} = 4\sqrt{\left\lbrack \frac{D_{\text{He}}}{a^{2}}\frac{t}{\pi} \right\rbrack} - \frac{3D_{\text{He}}}{2a^{2}}t
+\end{equation}
+
+If this fraction is greater than 0.57, then, when \(B < 1\), the fraction of helium released as a
+function of time, \(t\), equals
+
+\begin{equation}
+    \label{eq:he_release_fraction_2}
+    F_{\text{He}} = 1 + \frac{0.607927e^{- B} - 0.653644}{B}
+\end{equation}
+
+and, when \(B > 1\),
+
+\begin{equation}
+    \label{eq:he_release_fraction_3}
+    F_{\text{He}} = 1
+\end{equation}
+
+When \(t > \frac{1}{\pi^{2}\frac{D_{\text{He}}}{a^{2}}}\), the fraction of helium released is equal
+to that shown in Equations~\ref{eq:he_release_fraction_2} and~\ref{eq:he_release_fraction_3} . The
+diffusion coefficient of Helium divided by the effective radius squared is shown in
+Equation~\ref{eq:he_release_d_a}.
+
+\begin{equation}
+    \label{eq:he_release_d_a}
+    \frac{D_{\text{He}}}{a^{2}} = 
+        \begin{cases}
+            \num{0.452847E-10},                                                                               & T \leq \SInum{873}{K} \\
+            \num{0.28E-5}\exp \left( \frac{\num{4.0E4}}{1.986}\left( \frac{1}{1673} - \frac{1}{T} \right) \right) & T > \SInum{873}{K} 
+        \end{cases}
+\end{equation}
+
+\subsubsection{Integral Fuel Burnable Absorber Production} \label{section:integral-fuel-burnable-absorber-production}
+
+Some fuel designs use a thin layer of \element{ZrB}{2} applied to the surface of the pellets to act
+as an integral fuel burnable absorber (IFBA). The use of such coatings produces a large amount of
+helium. The following empirical correlation was fit to results from Monte Carlo N-Particle (MCNP), a
+neutron transport code, for helium production from IFBA liners.
+
+\begin{equation}
+    \label{eq:he_ifba_production}
+    \text{He}_{\text{prod}} = - \left( A_{1}IFBA + A_{2} \right){B10}^{2} + \left( B_{1}IFBA + B_{2} \right)B10
+\end{equation}
+
+Where,
+\ind{    \(\text{He}_{\text{prod}}\)      =   Helium production \sinum{atoms-He/cm^{3}-s}                    }
+\ind{     \(\text{IFBA}\)                 =   Percent of fuel rods in a core containing IFBA liners \sinum{\percent} (valid only between 10 and 50\percent)            }
+\ind{     \(B10\)                         =   Boron-10 enrichment \sinum{\percent} (valid from 0 to 90\percent) }
+\ind{     \(A_{1}\)                       =   $\num{6.23309E-9}$                                    }
+\ind{     \(A_{2}\)                       =   $\num{7.02006E-7}$                                    }
+\ind{     \(B_{1}\)                       =   $-\num{1.35675E-7}$                                   }
+\ind{     \(A_{2}\)                       =   $\num{3.1506E-4}$                                     }
+
+It can be seen from Equation~\ref{eq:he_ifba_production} that the helium production rate is a
+function of the number of IFBA rods in a core and the boron-10 enrichment. Helium is produced as the
+boron-10 burns out until there is no more boron-10 in the liner. The rate of boron-10 depletion is
+equal to the helium production rate. The depletion of boron-10 is calculated in the code and the
+remaining boron-10 enrichment, \(B10\) in Equation~\ref{eq:he_ifba_production}, at the end of the
+time step is used to calculate the helium production for the next time step. It is assumed in the
+code that all helium produced in the \element{ZrB}{2} coatings is released directly to the rod-free
+volume.
+

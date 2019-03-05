@@ -1,0 +1,35 @@
+\documentclass{book}
+%=========================================================================%
+%Preamble                                                                 %
+%=========================================================================%
+\input{../../common-LaTeX/preamble.tex}
+%=========================================================================%
+% Setup external references                                               %
+%=========================================================================%
+\externaldocument[mp:]{../../Material-Properties-Library/LaTeX/Material-Properties-Library}[../../Material-Properties-Library/LaTeX/Material-Properties-Library]
+%\externaldocument[cd:]{../../Code_Description/LaTeX}[../../Code_Description/LaTeX]
+%\externaldocument[ia:]{../../Integral_Assesment/LaTeX}[../../Integral_Assesment/LaTeX]
+%=========================================================================%
+% Begin document                                                          %
+%=========================================================================%
+\begin{document}
+\input{LaTeX_Input/title_page.tex}
+\input{LaTeX_Input/abstract.tex}
+\input{LaTeX_Input/foreward.tex}
+\input{LaTeX_Input/front_matter.tex}
+\mainmatter
+\input{LaTeX_Input/Section-1.tex}
+%\input{LaTeX_Input/Section-2.tex}
+%\input{LaTeX_Input/Section-3.tex}
+%\input{LaTeX_Input/HeatTransferCorrelations_CoolantModel.tex}
+%\input{LaTeX_Input/External_interfaces.tex}
+%=========================================================================%
+% References                                                              %
+%=========================================================================%
+\cleardoublepage
+\addcontentsline{toc}{section}{References}
+\bibliographystyle{../../common-LaTeX/frap-con}
+\bibliography{../../common-LaTeX/frap-con}
+%\backmatter
+%\input{LaTeX_Input/Appendix.tex}
+\end{document}

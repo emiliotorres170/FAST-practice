@@ -1,0 +1,285 @@
+\section{Corrosion and Hydrogen Pickup}\label{section:corrosion-and-hydrogen-pickup}
+
+There are two types of corrosion models in FAST-1.0: corrosion under normal LWR operating conditions
+and under high temperature steam-oxidation.
+
+\subsection{LWR Waterside Corrosion Models}\label{section:lwr-waterside-corrosion-models}
+
+\subsubsection{PWR Conditions}\label{section:pwr-conditions}
+
+For Zircaloy-4 under pressurized-water reactor (PWR) conditions, a cubic rate law for
+corrosion-layer thickness as a function of time is applied until a transition thickness is attained
+\cite{ref:Garzarolli1982}:
+
+\begin{equation}
+    \label{eq:cubic_rate_law_function_of_time}
+    \frac{d\left( s^{3} \right)}{dt} = \frac{A}{s^{2}}\exp\left( - \frac{Q_{1}}{RT_{1}} \right)
+\end{equation}
+
+In FAST-1.0, this equation is integrated without regard to the feedback between oxide layer
+thickness and oxide metal interface temperature to obtain
+
+\begin{equation}
+    \label{eq:cubic_rate_law_integrated}
+    s_{i + 1} = \left( 3A\exp\left( - \frac{Q_{1}}{RT_{1}} \right)\left( t_{i + 1} - t_{i} \right) + {s_{i}}^{3} \right)^{\frac{1}{3}}
+\end{equation}
+
+Where,
+\ind{   $i$,$\ i + 1$    =  Refers to beginning ($i$) and end ($i + 1$) of current time step                 }
+\ind{   $s$              =  Oxide thickness                                                       \sinum{m}            }
+\ind{   $A$              =  $\num{6.3E9}$                                                    \sinum{m^{3}/day}  }
+\ind{   $Q_{1}$          =  See Table~\ref{tab:enthalpy_transition_thickness_PWR}                                }
+\ind{   $R$              =  1.98                                                                  \sinum{cal/mol-K}    }
+\ind{   $T_{1}$          =  Metal-oxide interface temperature                                     \sinum{K}            }
+\ind{   $t$              =  Time                                                                  \sinum{days}         }
+
+After the transition thickness is attained, a flux-dependent linear rate law is applied, with the
+rate constant being an Arrhenius function of oxide-metal interface temperature:
+
+\begin{equation}
+    \label{eq:flux_dependent_linear_rate_law}
+    \frac{ds}{dt} = \left( C_{0} + U\left( M\Phi \right)^{P} \right)\exp\left( - \frac{Q_{2}}{RT_{1}} \right)
+\end{equation}
+
+Because there is significant feedback between oxide-layer thickness and oxide-metal interface
+temperature, the oxide thickness is converted to weight gain, and the approximate integral solution
+from \cite{ref:Garzarolli1982} is used. This solution has the form
+
+\begin{equation}
+    \label{eq:integral_solution_weight_gain}
+    \Delta w_{i + 1} = \Delta w_{i} + \frac{R{T_{0}}^{2}\lambda}{\gamma Q_{2}q^{\prime \prime}}{\ln\left\lbrack 1 - \frac{\gamma Q_{2}q^{\prime \prime }}{R{T_{0}}^{2}\lambda}k_{0}e^{\frac{- Q_{2}}{RT_{0}}}e^{\frac{\gamma Q_{2}q^{\prime \prime }\Delta w_{i}}{R{T_{0}}^{2}\lambda}}\left( t_{i + 1} - t_{i} \right) \right\rbrack}^{- 1}
+\end{equation}
+
+{\color{red}Consider expressing the above as,}
+\begin{equation}
+    \label{eq:weight_gain_above_transition_thickness_ZIRLO_OptZIRLO}
+    \Delta w_{i + 1} = \Delta w_{i} + \frac{R{T_{0}}^{2}\lambda}{2\gamma Q_{2}q^{\prime \prime}}{\ln\left\lbrack 1 - \frac{\gamma Q_{2}q^{\prime \prime}}{R{T_{0}}^{2}\lambda}k_{0}\exp\left( \frac{- Q_{2}}{RT_{0}}+\frac{\gamma Q_{2}q^{\prime \prime}2\Delta w_{i}}{R{T_{0}}^{2}\lambda}\right)\left( t_{i + 1} - t_{i} \right) \right\rbrack}^{- 1}
+\end{equation}
+
+Weight gain can be converted to thickness using the following formula:
+
+\begin{equation}
+    \label{eq:weight_gain_oxide_thickness}
+    s = \frac{\Delta w\gamma}{100}
+\end{equation}
+
+
+Where,
+\ind{   $i$,$ i + 1$  =  Refers to beginning ($i$) and end ($i + 1$) of current time step                                                         }
+\ind{   $s$             =  Oxide thickness                                                           \sinum{m}                                                }
+\ind{   $\Delta w$      =  Weight gain                                                               \sinum{g/cm^{2}}                          }
+\ind{   $R$             =  1.98                                                                      \sinum{cal/mol-K}                                        }
+\ind{   $T_{0}$         =  Oxide-to-water interface temperature                                      \sinum{K}                                                }
+\ind{   $\lambda$       =  Oxide thermal conductivity                                                \sinum{W/cm-K}                                           }
+\ind{   $\gamma$        =  0.6789                                                                    \sinum{cm^{3}/g}                          }
+\ind{   $Q_{2}$         =  See Table~\ref{tab:enthalpy_transition_thickness_PWR}                                                                        }
+\ind{   $q^{\prime \prime }$        =  Heat flux                                                    \sinum{W/cm^{2}}                          }
+\ind{   $k_{0}$           =  $11863 + \num{3.5E4}\left( \num{1.91E- 15}\Phi \right)^{0.24}$                                                     }
+\ind{   $\Phi$          =  Fast neutron flux (E$>\SInum{1}{MeV}$) \sinum{n/cm^{2}/s} }
+\ind{   $t$             =  Time                                                                      \sinum{days}                                             }
+
+\renewcommand{\captiontext}{Enthalpy and Transition Thickness under PWR Conditions.  (\cite{ref:Garzarolli1982})} 
+\begin{longtable}[c]{A{4.0cm}A{2.0cm}A{2.0cm}A{5.0cm}}
+    \caption{\captiontext}  \label{tab:enthalpy_transition_thickness_PWR}    \\ \hline
+            \textbf{Cladding Type}                       &   \textbf{$Q_{1}$ \sinum{cal/mol}}       &  \textbf{$Q_{2}$   \sinum{cal/mol}}     &   \textbf{Transition Thickness \sinum{\mu m}}  \\     \hline
+    \endfirsthead
+    \caption[]{\captiontext (continued)}  \\ \hline
+            \textbf{Cladding Type}                       &   \textbf{$Q_{1}$ \sinum{cal/mol}}       &  \textbf{$Q_{2}$   \sinum{cal/mol}}     &   \textbf{Transition Thickness \sinum{\mu m}}  \\     \hline
+    \endhead
+            Zirc-4                                       &   32289                   & 27354                     &   2        \\
+            M5                                           &   27446                   & 29816                     &   7        \\
+            ZIRLO\TM                                     &   32289                   & 27080                     &   2        \\
+            Optimized ZIRLO\TM                           &   32289                   & 27354                     &   2        \\
+\end{longtable}
+
+Above the transition thickness, if the oxide thickness is less than \SInum{80}{\mu m} then use \(2\Delta
+w_{i}\) in Equation~\ref{eq:weight_gain_oxide_thickness} and then divide the second term of
+Equation~\ref{eq:integral_solution_weight_gain} by 2 as shown in
+Equation~\ref{eq:weight_gain_above_transition_thickness_ZIRLO_OptZIRLO}.
+
+\begin{equation}
+    \label{eq:weight_gain_above_transition_thickness_ZIRLO_OptZIRLO}
+    \Delta w_{i + 1} = \Delta w_{i} + \frac{R{T_{0}}^{2}\lambda}{2\gamma Q_{2}q^{\prime \prime}}{\ln\left\lbrack 1 - \frac{\gamma Q_{2}q^{\prime \prime}}{R{T_{0}}^{2}\lambda}k_{0}e^{\frac{- Q_{2}}{RT_{0}}}e^{\frac{\gamma Q_{2}q^{\prime \prime}2\Delta w_{i}}{R{T_{0}}^{2}\lambda}}\left( t_{i + 1} - t_{i} \right) \right\rbrack}^{- 1}
+\end{equation}
+
+{\color{red}Consider the following}
+\begin{equation}
+    \label{eq:weight_gain_above_transition_thickness_ZIRLO_OptZIRLO}
+    \Delta w_{i + 1} = \Delta w_{i} + \frac{R{T_{0}}^{2}\lambda}{2\gamma Q_{2}q^{\prime \prime}}{\ln\left\lbrack 1 - \frac{\gamma Q_{2}q^{\prime \prime}}{R{T_{0}}^{2}\lambda}k_{0}\exp \left( \frac{- Q_{2}}{RT_{0}} + \frac{2\gamma Q_{2}q^{\prime \prime}\Delta w_{i}}{R{T_{0}}^{2}\lambda}\right) \left( t_{i + 1} - t_{i} \right) \right\rbrack}^{- 1}
+\end{equation}
+
+\subsubsection{BWR Conditions}\label{section:bwr-conditions}
+
+For Zircaloy-2 under boiling-water reactor (BWR) conditions, a flux-dependent linear rate law is
+applied, with the rate constant being an Arrhenius function of oxide-metal interface temperature:
+
+\begin{equation}
+    \label{eq:Zirc2_ds_dt}
+    \frac{ds}{dt} = K\exp\left( - \frac{Q}{RT_{1}} \right) \left\lbrack 1 + Cq^{\prime \prime }\exp \left( \frac{Q}{RT_{1}} \right) \right\rbrack
+\end{equation}
+
+Because there is significant feedback between oxide-layer thickness and oxide-metal interface
+temperature, the oxide thickness is converted to weight gain (as shown in
+Equation~\ref{eq:weight_gain_oxide_thickness}), and the approximate integral solution from
+(\cite{ref:Garzarolli1982}) is used. This solution has the form
+
+\begin{equation}
+    \label{eq:Zirc2_weight_gain}
+    \Delta w_{i + 1} = \Delta w_{i} + \frac{R{T_{0}}^{2}\lambda}{\gamma Q q^{\prime \prime}}{\ln\left\lbrack 1 - \frac{\gamma Q q^{\prime \prime}}{R{T_{0}}^{2}\lambda}ke^{\frac{- Q}{RT_{0}}}e^{\frac{\gamma Q q^{\prime \prime}\Delta w_{i}}{R{T_{0}}^{2}\lambda}}\left( t_{i + 1} - t_{i} \right) \right\rbrack}^{- 1} + Ck\left( t_{i + 1} - t_{i} \right)q^{\prime \prime}
+\end{equation}
+
+{\color{red}Consider writing the following}
+\begin{equation}
+    \label{eq:Zirc2_weight_gain}
+    \Delta w_{i + 1} = \Delta w_{i} + \frac{R{T_{0}}^{2}\lambda}{\gamma Q q^{\prime \prime}}{\ln\left\lbrack 1 - \frac{\gamma Q q^{\prime \prime}}{R{T_{0}}^{2}\lambda}k \exp \left(\frac{- Q}{RT_{0}} + \frac{\gamma Q q^{\prime \prime}\Delta w_{i}}{R{T_{0}}^{2}\lambda}\right) \left( t_{i + 1} - t_{i} \right) \right\rbrack}^{- 1} + Ck\left( t_{i + 1} - t_{i} \right)q^{\prime \prime}
+\end{equation}
+
+Where,
+\ind{   $i$,$\ i + 1$  =  Refers to beginning ($i$) and end ($i + 1$) of current time step                                 }
+\ind{   $s$              =  Oxide thickness                                                         \sinum{m}                             }
+\ind{   $\Delta w$       =  Weight gain                                                             \sinum{g/cm^{2}}       }
+\ind{   $R$              =  1.98                                                                    \sinum{cal/mol-K}                     }
+\ind{   $T_{0}$          =  Oxide-to-water interface temperature                                    \sinum{K}                             }
+\ind{   $\lambda$        =  Oxide thermal conductivity                                              \sinum{W/cm-K}                        }
+\ind{   $\gamma$         =  0.6789                                                                  \sinum{cm^{3}/g}       }
+\ind{   $Q$              =  27350                                                                   \sinum{cal/mol}                       }
+\ind{   $q^{\prime \prime }$         =  Heat flux                                                   \sinum{W/cm^{2}}       }
+\ind{   $k$              =  11800                                                                   \sinum{g/cm^{2}-day} }
+\ind{   $\Phi$           =  Fast neutron flux (E\textgreater{}1 MeV) \sinum{n/cm^{2}-s}     }
+\ind{   $C$              =  $\num{2.5E-16}$                                                         \sinum{m^{2}/W}        }
+\ind{   $t$              =  Time                                                                    \sinum{days}                          }
+
+To achieve numerical stability, the rate equation is integrated across each time step and applied to
+calculated corrosion layer increments per time step, which are accumulated to calculate cumulative
+layer thickness as a function of axial position (axial node) along the fuel rod.
+
+\subsection{Hydrogen Pickup Fraction}\label{section:hydrogen-pickup-fraction}
+
+The fraction of the hydrogen liberated by the metal-water corrosion reaction that is absorbed
+locally by the cladding is called the pickup fraction. For PWR conditions, a constant hydrogen
+pickup fraction has been found to be applicable. Table~\ref{tab:hydrogen_pickup_fraction_pwr} lists
+the hydrogen pickup fraction for the claddings available in FAST.
+
+\renewcommand{\captiontext}{Hydrogen pickup fraction under PWR conditions. (\cite{ref:Geelhood2011a})} 
+\begin{longtable}[c]{A{6.0cm} A{6.0cm}}
+    \caption{\captiontext}    \label{tab:hydrogen_pickup_fraction_pwr}                         \\ \hline
+        \textbf{Cladding Type}              &       \textbf{Pickup Fraction}  \\  \hline
+    \endfirsthead
+    \caption[]{\captiontext (continued)}                         \\ \hline
+        \textbf{Cladding Type}              &       \textbf{Pickup Fraction}  \\  \hline
+    \endhead
+        Zirc-4                              &       0.15             \\
+        M5                                  &       0.10             \\
+        ZIRLO\TM                            &       0.175            \\
+        Optimized ZIRLO\TM                  &       0.175            \\
+\end{longtable}
+
+For BWR conditions, a constant hydrogen pickup fraction does not fit the observed hydrogen
+concentration data. Therefore, FAST-1.0 uses a burnup-dependent hydrogen concentration model
+(\cite{ref:Geelhood2008c}). For Zircaloy-2 prior to 1998 (when the vendors did not have tight
+control over concentration and second-phase precipitate particle size),
+Equation~\ref{eq:Zirc2_pre_1998_hydrogen} is used.
+
+\begin{equation}
+    \label{eq:Zirc2_pre_1998_hydrogen}
+        H_{conc} = 
+            \begin{cases}
+                47.8 \exp \left(- \frac{1.3}{1 + BU}\right) + 0.316BU               & BU < \SInum{50}{GWd/MTU} \\
+                28.9 + \exp \left( 0.117\left( BU - 20 \right) \right)              & BU \geq \SInum{50}{GWd/MTU} 
+            \end{cases}
+\end{equation}
+
+For modern Zircaloy-2 since 1998 (when the vendors have had tight control over concentration and
+second phase precipitate particle size), Equation~\ref{eq:Zirc2_post_1998_hydrogen} is used.
+
+\begin{equation}
+    \label{eq:Zirc2_post_1998_hydrogen}
+    H_{conc} = 22.8 + \exp \left( 0.117\left( BU - 20 \right) \right)
+\end{equation}
+
+Where,
+\ind{   $H_{conc}$           =    Hydrogen concentration \sinum{ppm}  }
+\ind{   $BU$                 =    Local burnup \sinum{GWd/MTU}        }
+
+\subsection{High-Temperature Corrosion}\label{section:high-temperature-corrosion}
+
+In FAST, the initial oxide thickness from in-reactor behavior is calculated using the previously
+described correlations, or input to the code. During a reduced-cooling, high-temperature transient,
+such as LOCA, the cladding temperature can become very hot relative to steady-state operations.
+Under these circumstances, a large corrosion layer could form in a matter of seconds to minutes.
+This corrosion layer both erodes the structural thickness of the cladding and produces excess energy
+term resulting from the exothermic Zirconium-Water reaction. FAST contains two high-temperature
+corrosion models, the Cathcart/Pawel (\cite{ref:Cathcart1977}) model and the
+Baker/Just (\cite{ref:Baker1962}) model, that are selected using the input
+variable $modmw$. In addition, the option exists to not model high-temperature corrosion. Guidance
+on model selection is given in the input instructions shown in \colorbox{yellow}{Appendix A}.
+\\
+\\
+The Cathcart/Pawel (default) model is activated in FAST-1.0 when the cladding temperature exceeds
+\SInum{1073}{K} (\SInum{800}{\mDC}). The Baker/Just model is activated in FAST-1.0 when the cladding
+temperature exceeds \SInum{1000}{K} (\SInum{727}{\mDC}). A derivation of these models and discussion
+of extrapolation to lower temperatures than the models were originally validated for is provided in
+\colorbox{yellow}{Appendix G}. These models are described below.
+\\
+\\
+Both the Cathcart-Pawel and Baker-Just models are of the following form:
+
+\begin{equation}
+    \label{eq:cp_bj_base_form}
+    \frac{dK}{dt} = \frac{1}{K}A\exp\left(\frac{- B}{RT}\right)
+\end{equation}
+
+Where,
+\ind{   $K$              =  Oxide thickness \sinum{m} }
+\ind{   $t$              =  Time            \sinum{s} }
+\ind{   $T$              =  Temperature     \sinum{K} }
+\ind{   $A$,$B$,$R$  =  Constants           }
+
+This equation can be integrated and rearranged to the following form:
+
+\begin{equation}
+    \label{eq:cp_bj_K2}
+    K_{2} = \sqrt{K_{1}^{2} + 2A  \exp\left(\frac{- B}{RT}\right)  \Delta t}
+\end{equation}
+
+Where
+\ind{   $K_{1}$  =  Oxide thickness at beginning of time step \sinum{m} }
+\ind{   $K_{2}$  =  Oxide thickness at end of time step       \sinum{m} }
+
+Table~\ref{tab:constants_cp_bj_models} shows the parameters that are used for the Cathcart-Pawel and
+Baker-Just models.
+ 
+\renewcommand{\captiontext}{Constants for Cathcart-Pawel and Baker-Just Models} 
+\begin{longtable}[c]{A{2.0cm}A{4.0cm}A{4.0cm}}
+    \caption{\captiontext}  \label{tab:constants_cp_bj_models}  \\ \hline
+        \textbf{Constant}                           & \textbf{Cathcart-Pawel}                   & \textbf{Baker-Just}                                   \\  \hline
+    \endfirsthead
+    \caption[]{\captiontext (continued)}   \\ \hline
+        \textbf{Constant}                           & \textbf{Cathcart-Pawel}                   & \textbf{Baker-Just}                                   \\  \hline
+    \endhead
+        \(A\)                                       & $\SInum{1.126E-6}{m^{2}/s}$               & $\SInum{9.415E-5}{m^{2}/s}$                               \\
+        \(B\)                                       & $\SInum{1.502E5}{J/mol}$                  & $\SInum{4.550E4}{cal/mol}$                 \\
+        \(R\)                                       & $\SInum{8.314}{J/mol-K}$                  & $\SInum{1.987}{cal/mol-K}$                              \\
+\end{longtable}
+
+For the Cathcart-Pawel model, the user can specify that the weight gain be calculated assuming
+perfect stoichiometry of the oxide, or by assuming a stoichiometric gradient \textit{iStoicGrad}. It
+can be seen from Equation~\ref{eq:cp_bj_base_form} that the rate of oxidation is inversely
+proportional to the oxide layer thickness. In FAST there are two ways of treating the initial oxide
+thickness layer that are selected using the input variable, ProtectiveOxide. If $ProtectiveOxide =
+0$, the initial oxide from steady state is included with the high temperature oxidation, so the rate
+of oxidation for a previously oxidized rod is lower than for a rod with no oxide. If
+$ProtectiveOxide = 1$, the initial oxide from steady-state is not included with the high-temperature
+oxidation, so the rate of oxidation for a previously oxidized rod is the same as the rate for a rod
+with no oxide.
+\\
+\\
+FAST calculates the oxidation of the outer rod surface and, if the inner cladding surface is in
+contact with steam (i.e., the rod has burst), the oxidation of the inner rod surface. From these
+inner diameter (ID) and outer diameter (OD) oxide layer thicknesses, FAST calculates the
+oxygen-stabilized alpha layer, the oxygen uptake, the metal water reactor energy, and equivalent
+cladding reacted (ECR). For the stress calculations, FAST reduces the wall thickness based on the
+thinning from the oxide layer growth. No strength is attributed to the oxide layer.  FAST-1.0
+includes an option to calculate ID oxidation regardless of rupture above a specified burnup
+\textit{BuOxide}.
+
